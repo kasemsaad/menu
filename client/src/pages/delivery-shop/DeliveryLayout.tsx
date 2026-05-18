@@ -1,11 +1,12 @@
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { GuestBottomNav } from "@/components/GuestBottomNav";
+import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LangToggle } from "@/components/LangToggle";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
-import { Truck, LogIn, UserPlus, LogOut } from "lucide-react";
+import { LogIn, UserPlus, LogOut } from "lucide-react";
 
 const basePath = "/shop";
 
@@ -18,15 +19,9 @@ export const DeliveryLayout = () => {
     <CartProvider>
       <section className="min-h-screen pb-20">
         <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-surface-light/90 px-4 py-3 backdrop-blur dark:border-stone-800 dark:bg-surface-dark/90">
-          <section className="mx-auto flex max-w-lg items-center justify-between">
-            <section>
-              <h1 className="flex items-center gap-2 font-display text-xl font-bold text-brand-700 dark:text-brand-400">
-                <Truck size={22} />
-                {t("appName")}
-              </h1>
-              <p className="text-xs text-stone-500">{t("delivery")}</p>
-            </section>
-            <section className="flex items-center gap-1">
+          <section className="mx-auto flex max-w-lg items-center justify-between gap-2">
+            <BrandLogo subtitle={t("delivery")} />
+            <section className="flex shrink-0 items-center gap-1">
               {customer ? (
                 <>
                   <span className="hidden text-xs text-stone-500 sm:inline">{customer.name}</span>

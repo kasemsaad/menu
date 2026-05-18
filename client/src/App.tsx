@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SettingsProvider } from "@/contexts/SettingsContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
@@ -15,6 +16,7 @@ import { GuestCheckout } from "@/pages/guest/GuestCheckout";
 import { DeliveryCheckout } from "@/pages/delivery-shop/DeliveryCheckout";
 import { OrderStatus } from "@/pages/guest/OrderStatus";
 import { GuestOffers } from "@/pages/guest/GuestOffers";
+import { GuestTableOrders } from "@/pages/guest/GuestTableOrders";
 import { CustomerSignup } from "@/pages/customer/CustomerSignup";
 import { CustomerLogin } from "@/pages/customer/CustomerLogin";
 import { ChefDashboard } from "@/pages/chef/ChefDashboard";
@@ -26,8 +28,9 @@ import { AdminSettings } from "@/pages/admin/AdminSettings";
 
 const App = () => (
   <ThemeProvider>
-    <AuthProvider>
-      <NotificationProvider>
+    <SettingsProvider>
+      <AuthProvider>
+        <NotificationProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/customer/signup" element={<CustomerSignup />} />
@@ -37,6 +40,7 @@ const App = () => (
             <Route path="menu" element={<GuestMenu />} />
             <Route path="product/:id" element={<ProductDetail />} />
             <Route path="cart" element={<GuestCart />} />
+            <Route path="table-orders" element={<GuestTableOrders />} />
             <Route path="checkout" element={<GuestCheckout />} />
             <Route path="order/:orderId" element={<OrderStatus />} />
             <Route path="offers" element={<GuestOffers />} />
@@ -100,8 +104,9 @@ const App = () => (
           <Route path="/" element={<Navigate to="/shop" replace />} />
           <Route path="*" element={<Navigate to="/shop" replace />} />
         </Routes>
-      </NotificationProvider>
-    </AuthProvider>
+        </NotificationProvider>
+      </AuthProvider>
+    </SettingsProvider>
   </ThemeProvider>
 );
 

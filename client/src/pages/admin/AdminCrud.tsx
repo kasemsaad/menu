@@ -124,9 +124,9 @@ const statusClass = (status: TableInfo["status"]) => {
 };
 
 const tableToForm = (t: TableInfo): TableForm => ({
-  number: t.number,
-  capacity: t.capacity,
-  status: t.status,
+  number: t.number ?? 1,
+  capacity: t.capacity ?? 4,
+  status: t.status ?? "available",
 });
 
 const userToForm = (u: AdminUser): UserForm => ({
@@ -184,22 +184,31 @@ const readFileAsDataUrl = (file: File): Promise<string> =>
     reader.readAsDataURL(file);
   });
 
-const categoryToForm = (c: Category): CategoryForm => ({
-  nameEn: c.name.en,
-  nameAr: c.name.ar,
-  descriptionEn: c.description?.en ?? "",
-  descriptionAr: c.description?.ar ?? "",
-  image: c.image ?? "",
-  sortOrder: c.sortOrder,
-  isActive: c.isActive,
+const locName = (name?: { en?: string; ar?: string }) => ({
+  en: name?.en ?? "",
+  ar: name?.ar ?? "",
 });
 
+const categoryToForm = (c: Category): CategoryForm => {
+  const name = locName(c.name);
+  return {
+    nameEn: name.en,
+    nameAr: name.ar,
+    descriptionEn: c.description?.en ?? "",
+    descriptionAr: c.description?.ar ?? "",
+    image: c.image ?? "",
+    sortOrder: c.sortOrder ?? 0,
+    isActive: c.isActive ?? true,
+  };
+};
+
 const productToForm = (p: Product): ProductForm => {
+  const name = locName(p.name);
   const categoryId =
     typeof p.categoryId === "object" ? p.categoryId._id : String(p.categoryId ?? "");
   return {
-    nameEn: p.name.en,
-    nameAr: p.name.ar,
+    nameEn: name.en,
+    nameAr: name.ar,
     descriptionEn: p.description?.en ?? "",
     descriptionAr: p.description?.ar ?? "",
     price: p.price,
@@ -208,9 +217,9 @@ const productToForm = (p: Product): ProductForm => {
     isAvailable: p.isAvailable,
     isFeatured: p.isFeatured,
     addons: (p.addons ?? []).map((a) => ({
-      nameEn: a.name.en,
-      nameAr: a.name.ar,
-      price: a.price,
+      nameEn: a.name?.en ?? "",
+      nameAr: a.name?.ar ?? "",
+      price: a.price ?? 0,
     })),
   };
 };
@@ -495,8 +504,9 @@ export const AdminCrud = ({ resource }: { resource: Resource }) => {
   const load = () => api.get(endpoints[resource]).then((r) => setItems(r.data));
 
   useEffect(() => {
-    load();
+    setItems([]);
     setEditingId(null);
+    load();
   }, [resource]);
 
   useEffect(() => {
@@ -535,8 +545,8 @@ export const AdminCrud = ({ resource }: { resource: Resource }) => {
           </div>
         )}
         <LocalizedRow
-          nameEn={item.name.en}
-          nameAr={item.name.ar}
+          nameEn={item.name?.en ?? ""}
+          nameAr={item.name?.ar ?? ""}
           descriptionEn={item.description?.en}
           descriptionAr={item.description?.ar}
         />
@@ -605,15 +615,15 @@ export const AdminCrud = ({ resource }: { resource: Resource }) => {
           )}
           <div className="min-w-0 flex-1 space-y-1 text-sm">
             <LocalizedRow
-              nameEn={item.name.en}
-              nameAr={item.name.ar}
+              nameEn={item.name?.en ?? ""}
+              nameAr={item.name?.ar ?? ""}
               descriptionEn={item.description?.en}
               descriptionAr={item.description?.ar}
             />
-            <p className="font-bold text-brand-600">{item.price} EGP</p>
+            <p className="font-bold text-brand-600">{item.price ?? 0} EGP</p>
             {catName && (
               <p className="text-xs text-stone-500">
-                {catName.en} / {catName.ar}
+                {catName.en ?? ""} / {catName.ar ?? ""}
               </p>
             )}
             <div className="flex gap-2 text-xs">
@@ -679,7 +689,9 @@ export const AdminCrud = ({ resource }: { resource: Resource }) => {
     );
   };
 
-  const renderTableItem = (item: TableInfo) => (
+  const renderTableItem = (item: TableInfo) => {
+    const status = item.status ?? "available";
+    return (
     <article key={item._id} className="card space-y-3">
       <div className="flex items-center gap-4">
         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-brand-100 font-display text-xl font-bold text-brand-700 dark:bg-brand-900/40">
@@ -689,10 +701,10 @@ export const AdminCrud = ({ resource }: { resource: Resource }) => {
           <p className="font-semibold">
             {t("table")} #{item.number}
           </p>
-          <p className="text-stone-500">Capacity: {item.capacity}</p>
-          <p className="truncate text-xs text-stone-400">QR: {item.qrCode}</p>
-          <span className={`inline-block rounded-full px-2 py-0.5 text-xs capitalize ${statusClass(item.status)}`}>
-            {item.status.replace("_", " ")}
+          <p className="text-stone-500">Capacity: {item.capacity ?? 4}</p>
+          <p className="truncate text-xs text-stone-400">QR: {item.qrCode ?? "—"}</p>
+          <span className={`inline-block rounded-full px-2 py-0.5 text-xs capitalize ${statusClass(status)}`}>
+            {status.replace("_", " ")}
           </span>
         </div>
         <div className="flex shrink-0 gap-2">
@@ -731,7 +743,8 @@ export const AdminCrud = ({ resource }: { resource: Resource }) => {
         </Formik>
       )}
     </article>
-  );
+    );
+  };
 
   const renderUserItem = (item: AdminUser) => (
     <article key={item._id} className="card space-y-3">

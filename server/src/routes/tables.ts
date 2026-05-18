@@ -2,13 +2,27 @@ import { Router } from "express";
 import QRCode from "qrcode";
 import { v4 as uuidv4 } from "uuid";
 import { Table } from "../models/Table.js";
-import { auth, requireRole } from "../middleware/auth.js";
+import { Order } from "../models/Order.js";
+import { User } from "../models/User.js";
+import { auth, requireRole, AuthRequest } from "../middleware/auth.js";
+import { activeOrderFilter } from "../utils/orderQuery.js";
+import { emitTableCleared } from "../socket/index.js";
 
 const router = Router();
 const clientUrl = () => process.env.CLIENT_URL || "http://localhost:5173";
 
-router.get("/", auth, requireRole("admin", "waiter"), async (_req, res) => {
-  const tables = await Table.find().sort("number");
+router.get("/", auth, requireRole("admin", "waiter"), async (req: AuthRequest, res) => {
+  const filter: Record<string, unknown> = {};
+  if (req.user?.role === "waiter" && req.query.all !== "true") {
+    const waiter = await User.findById(req.user.id);
+    if (!waiter?.onShift) {
+      return res.json([]);
+    }
+    if (waiter.assignedTableIds?.length) {
+      filter._id = { $in: waiter.assignedTableIds };
+    }
+  }
+  const tables = await Table.find(filter).sort("number");
   res.json(tables);
 });
 
@@ -45,12 +59,44 @@ router.patch("/:id", auth, requireRole("admin"), async (req, res) => {
   res.json(table);
 });
 
-router.patch("/:id/status", auth, requireRole("admin", "waiter"), async (req, res) => {
+router.patch("/:id/status", auth, requireRole("admin", "waiter"), async (req: AuthRequest, res) => {
+  if (req.user?.role === "waiter") {
+    const waiter = await User.findById(req.user.id);
+    if (!waiter?.onShift) return res.status(403).json({ message: "Start your shift first" });
+    const allowed = waiter.assignedTableIds?.some((id) => id.toString() === req.params.id);
+    if (!allowed) return res.status(403).json({ message: "Table not in your assignment" });
+  }
   const table = await Table.findByIdAndUpdate(
     req.params.id,
     { status: req.body.status },
     { new: true }
   );
+  if (!table) return res.status(404).json({ message: "Not found" });
+  res.json(table);
+});
+
+/** Clear table after bill — sets available and clears waiter-call flags */
+router.post("/:id/reset", auth, requireRole("admin", "waiter"), async (req: AuthRequest, res) => {
+  if (req.user?.role === "waiter") {
+    const waiter = await User.findById(req.user.id);
+    if (!waiter?.onShift) return res.status(403).json({ message: "Start your shift first" });
+    const allowed = waiter.assignedTableIds?.some((id) => id.toString() === req.params.id);
+    if (!allowed) return res.status(403).json({ message: "Table not in your assignment" });
+  }
+  const table = await Table.findByIdAndUpdate(
+    req.params.id,
+    { status: "available" },
+    { new: true }
+  );
+  if (!table) return res.status(404).json({ message: "Not found" });
+
+  const now = new Date();
+  await Order.updateMany(
+    { tableId: req.params.id, type: "dine_in", ...activeOrderFilter },
+    { deletedAt: now, callWaiter: false }
+  );
+
+  emitTableCleared(req.params.id);
   res.json(table);
 });
 

@@ -6,12 +6,47 @@
   html {
     @apply scroll-smooth;
   }
+  :root {
+    --brand-50: #fff7ed;
+    --brand-50-rgb: 255, 247, 237;
+    --brand-100: #ffedd5;
+    --brand-100-rgb: 255, 237, 213;
+    --brand-200: #fed7aa;
+    --brand-200-rgb: 254, 215, 170;
+    --brand-300: #fdba74;
+    --brand-300-rgb: 253, 186, 116;
+    --brand-400: #fb923c;
+    --brand-400-rgb: 251, 146, 60;
+    --brand-500: #f97316;
+    --brand-500-rgb: 249, 115, 22;
+    --brand-600: #ea580c;
+    --brand-600-rgb: 234, 88, 12;
+    --brand-700: #c2410c;
+    --brand-700-rgb: 194, 65, 12;
+    --brand-800: #9a3412;
+    --brand-800-rgb: 154, 52, 18;
+    --brand-900: #7c2d12;
+    --brand-900-rgb: 124, 45, 18;
+    --brand-accent: #f97316;
+    --brand-accent-rgb: 249, 115, 22;
+  }
   body {
     @apply font-body antialiased bg-surface-light text-stone-900 dark:bg-surface-dark dark:text-stone-100;
   }
 }
 
 @layer components {
+  .bg-hero-brand {
+    background: linear-gradient(
+      to bottom right,
+      var(--brand-gradient-from),
+      var(--brand-gradient-mid),
+      var(--brand-gradient-to)
+    );
+  }
+  .bg-page-brand {
+    @apply bg-gradient-to-br from-brand-50 via-white to-brand-100 dark:from-stone-950 dark:via-stone-900 dark:to-stone-950;
+  }
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 font-semibold text-white shadow-lg shadow-brand-600/25 transition hover:bg-brand-700 active:scale-[0.98] disabled:opacity-50;
   }

@@ -1,30 +1,56 @@
 import { NavLink } from "react-router-dom";
-import { Home, UtensilsCrossed, ShoppingBag, Tag } from "lucide-react";
+import { Home, UtensilsCrossed, ShoppingBag, Tag, ClipboardList } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCart } from "@/contexts/CartContext";
 
-export const GuestBottomNav = ({ basePath }: { basePath: string }) => {
+type Props = { basePath: string; tableId?: string | null };
+
+export const GuestBottomNav = ({ basePath, tableId }: Props) => {
   const { t } = useTranslation();
   const { count } = useCart();
   const link = (to: string) =>
     `flex flex-col items-center gap-0.5 text-xs transition ${to}`;
 
+  const showTableOrders = Boolean(tableId);
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-stone-200 bg-white/95 px-4 py-2 backdrop-blur dark:border-stone-800 dark:bg-stone-900/95">
-      <div className="mx-auto flex max-w-lg justify-around">
-        <NavLink to={basePath} end className={({ isActive }) => link(isActive ? "text-brand-600" : "text-stone-500")}>
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-stone-200 bg-white/95 px-2 py-2 backdrop-blur dark:border-stone-800 dark:bg-stone-900/95">
+      <div className={`mx-auto flex max-w-lg ${showTableOrders ? "justify-between gap-0.5" : "justify-around"}`}>
+        <NavLink
+          to={basePath}
+          end
+          className={({ isActive }) => `${link(isActive ? "text-brand-600" : "text-stone-500")} min-w-0 flex-1`}
+        >
           <Home size={22} />
-          {t("home")}
+          <span className="max-w-full truncate px-0.5">{t("home")}</span>
         </NavLink>
-        <NavLink to={`${basePath}/menu`} className={({ isActive }) => link(isActive ? "text-brand-600" : "text-stone-500")}>
+        <NavLink
+          to={`${basePath}/menu`}
+          className={({ isActive }) => `${link(isActive ? "text-brand-600" : "text-stone-500")} min-w-0 flex-1`}
+        >
           <UtensilsCrossed size={22} />
-          {t("menu")}
+          <span className="max-w-full truncate px-0.5">{t("menu")}</span>
         </NavLink>
-        <NavLink to={`${basePath}/offers`} className={({ isActive }) => link(isActive ? "text-brand-600" : "text-stone-500")}>
+        <NavLink
+          to={`${basePath}/offers`}
+          className={({ isActive }) => `${link(isActive ? "text-brand-600" : "text-stone-500")} min-w-0 flex-1`}
+        >
           <Tag size={22} />
-          {t("offers")}
+          <span className="max-w-full truncate px-0.5">{t("offers")}</span>
         </NavLink>
-        <NavLink to={`${basePath}/cart`} className={({ isActive }) => link(isActive ? "text-brand-600" : "text-stone-500")}>
+        {showTableOrders && (
+          <NavLink
+            to={`${basePath}/table-orders`}
+            className={({ isActive }) => `${link(isActive ? "text-brand-600" : "text-stone-500")} min-w-0 flex-1`}
+          >
+            <ClipboardList size={22} />
+            <span className="max-w-full truncate px-0.5">{t("tableOrders")}</span>
+          </NavLink>
+        )}
+        <NavLink
+          to={`${basePath}/cart`}
+          className={({ isActive }) => `${link(isActive ? "text-brand-600" : "text-stone-500")} min-w-0 flex-1`}
+        >
           <span className="relative">
             <ShoppingBag size={22} />
             {count > 0 && (
@@ -33,7 +59,7 @@ export const GuestBottomNav = ({ basePath }: { basePath: string }) => {
               </span>
             )}
           </span>
-          {t("cart")}
+          <span className="max-w-full truncate px-0.5">{t("cart")}</span>
         </NavLink>
       </div>
     </nav>

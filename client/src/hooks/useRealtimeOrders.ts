@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { getSocket, joinRole } from "@/lib/socket";
+import { getSocket, joinRole, joinStaff } from "@/lib/socket";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Order } from "@/types";
 
@@ -13,6 +13,7 @@ export const useRealtimeOrders = (
   useEffect(() => {
     if (!user) return;
     joinRole(user.role);
+    joinStaff(user.id);
     const socket = getSocket();
     const refresh = () => onRefresh();
 

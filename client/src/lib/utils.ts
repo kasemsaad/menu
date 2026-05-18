@@ -16,6 +16,12 @@ export const getOrderTableNumber = (
   return undefined;
 };
 
+export const getOrderTableId = (order?: Pick<Order, "tableId">): string | undefined => {
+  if (!order?.tableId) return undefined;
+  if (typeof order.tableId === "string") return order.tableId;
+  return order.tableId._id;
+};
+
 export const openWhatsApp = (phone: string, message: string) => {
   const clean = phone.replace(/\D/g, "");
   window.open(`https://wa.me/${clean}?text=${encodeURIComponent(message)}`, "_blank");

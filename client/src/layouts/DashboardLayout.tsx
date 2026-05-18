@@ -15,6 +15,7 @@ import {
   ConciergeBell,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LangToggle } from "@/components/LangToggle";
 
@@ -48,8 +49,7 @@ export const DashboardLayout = ({ role }: { role: "admin" | "chef" | "waiter" | 
   return (
     <div className="flex min-h-screen bg-stone-50 dark:bg-stone-950">
       <aside className="hidden w-64 flex-col border-r border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900 md:flex">
-        <h1 className="font-display text-xl font-bold text-brand-600">{t("appName")}</h1>
-        <p className="mt-1 text-xs capitalize text-stone-500">{user?.role}</p>
+        <BrandLogo size="sm" subtitle={user?.role} className="px-1" />
         <nav className="mt-8 flex flex-1 flex-col gap-1">
           {links.map(({ to, icon: Icon, label }) => (
             <NavLink

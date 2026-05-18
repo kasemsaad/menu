@@ -48,6 +48,7 @@ export interface IOrder extends Document {
   notes?: string;
   callWaiter: boolean;
   branchId?: mongoose.Types.ObjectId;
+  deletedAt?: Date | null;
 }
 
 const orderItemSchema = new Schema<IOrderItem>({
@@ -90,11 +91,13 @@ const orderSchema = new Schema<IOrder>(
     notes: String,
     callWaiter: { type: Boolean, default: false },
     branchId: { type: Schema.Types.ObjectId, ref: "Branch" },
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
 
 orderSchema.index({ status: 1, createdAt: -1 });
 orderSchema.index({ tableId: 1 });
+orderSchema.index({ deletedAt: 1 });
 
 export const Order = mongoose.model<IOrder>("Order", orderSchema);

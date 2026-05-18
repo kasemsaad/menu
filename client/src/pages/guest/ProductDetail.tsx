@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Minus, Plus, Star } from "lucide-react";
 import api from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
 import type { Product, Addon } from "@/types";
 import { t as loc, formatPrice } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
@@ -13,6 +14,7 @@ export const ProductDetail = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { addItem } = useCart();
+  const { showToast } = useToast();
   const [product, setProduct] = useState<Product | null>(null);
   const [qty, setQty] = useState(1);
   const [selectedAddons, setSelectedAddons] = useState<Addon[]>([]);
@@ -37,11 +39,15 @@ export const ProductDetail = () => {
   const lineTotal = (product.price + addonTotal) * qty;
 
   const submitRating = async () => {
-    await api.post(`/products/${id}/reviews`, {
-      rating,
-      tableNumber: sessionStorage.getItem("tableNumber"),
-    });
-    alert("Thanks for your rating!");
+    try {
+      await api.post(`/products/${id}/reviews`, {
+        rating,
+        tableNumber: sessionStorage.getItem("tableNumber"),
+      });
+      showToast(t("thanksRating"), "success");
+    } catch {
+      /* global toast */
+    }
   };
 
   return (

@@ -79,6 +79,7 @@ export interface Order {
   paymentMethod: "cash" | "paymob";
   paymentStatus: string;
   callWaiter?: boolean;
+  deletedAt?: string | null;
   createdAt: string;
 }
 
@@ -101,6 +102,9 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  onShift?: boolean;
+  shiftStartedAt?: string;
+  assignedTableIds?: string[];
 }
 
 export interface AdminUser {
@@ -132,10 +136,27 @@ export interface Offer {
   productIds: Product[];
 }
 
-export interface Settings {
+export interface NotificationSounds {
+  newOrder?: string;
+  urgent?: string;
+  success?: string;
+  update?: string;
+}
+
+export interface AppSettings {
   taxPercent: number;
   deliveryFee: number;
   currency: string;
   whatsappNumber: string;
   restaurantName: Localized;
+  logo?: string;
+  primaryColor: string;
+  accentColor: string;
+  openTime?: string;
+  closeTime?: string;
+  notificationSounds?: NotificationSounds;
+  soundVolume?: number;
 }
+
+/** @deprecated use AppSettings */
+export type Settings = AppSettings;

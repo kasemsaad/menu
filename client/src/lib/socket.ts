@@ -14,6 +14,10 @@ export const joinRole = (role: string) => {
   getSocket().emit("join:role", role);
 };
 
+export const joinStaff = (userId: string) => {
+  getSocket().emit("join:staff", userId);
+};
+
 export const joinTable = (tableId: string) => {
   getSocket().emit("join:table", tableId);
 };

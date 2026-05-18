@@ -17,7 +17,7 @@ export const GuestHome = () => {
 
   return (
     <section className="space-y-6">
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-600 via-brand-500 to-amber-500 p-6 text-white shadow-xl">
+      <section className="relative overflow-hidden rounded-3xl bg-hero-brand p-6 text-white shadow-xl">
         <Sparkles className="absolute right-4 top-4 opacity-30" size={48} />
         <p className="text-sm font-medium uppercase tracking-wider opacity-90">{t("featured")}</p>
         <h2 className="mt-1 font-display text-2xl font-bold">{t("appName")}</h2>

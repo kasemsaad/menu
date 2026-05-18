@@ -3,8 +3,10 @@ import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
+import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LangToggle } from "@/components/LangToggle";
+import { getErrorMessage } from "@/lib/errors";
 
 const schema = Yup.object({
   email: Yup.string().email().required(),
@@ -24,14 +26,14 @@ export const Login = () => {
   };
 
   return (
-    <section className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 via-white to-amber-50 p-4 dark:from-stone-950 dark:via-stone-900 dark:to-stone-950">
+    <section className="flex min-h-screen items-center justify-center bg-page-brand p-4">
       <section className="absolute end-4 top-4 flex gap-2">
         <LangToggle />
         <ThemeToggle />
       </section>
       <section className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl dark:bg-stone-900">
-        <h1 className="font-display text-3xl font-bold text-brand-700">{t("appName")}</h1>
-        <p className="mt-1 text-stone-500">{t("login")}</p>
+        <BrandLogo size="lg" className="mb-2 justify-center [&_section]:text-center" />
+        <p className="text-center text-stone-500">{t("login")}</p>
         <Formik
           initialValues={{ email: "admin@cafe.com", password: "admin123" }}
           validationSchema={schema}
@@ -39,8 +41,8 @@ export const Login = () => {
             try {
               const user = await login(values.email, values.password);
               navigate(rolePath[user.role] || "/admin");
-            } catch {
-              setErrors({ email: "Invalid credentials" });
+            } catch (err) {
+              setErrors({ email: getErrorMessage(err, t("invalidCredentials")) });
             }
           }}
         >

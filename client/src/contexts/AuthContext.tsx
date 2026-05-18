@@ -2,6 +2,16 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import api from "@/lib/api";
 import type { User, CustomerUser } from "@/types";
 
+const mapStaffUser = (data: Record<string, unknown>): User => ({
+  id: String(data.id ?? data._id),
+  name: String(data.name),
+  email: String(data.email),
+  role: data.role as User["role"],
+  onShift: Boolean(data.onShift),
+  shiftStartedAt: data.shiftStartedAt as string | undefined,
+  assignedTableIds: (data.assignedTableIds as string[]) ?? [],
+});
+
 const AuthContext = createContext<{
   user: User | null;
   customer: CustomerUser | null;
@@ -14,6 +24,7 @@ const AuthContext = createContext<{
     phone: string;
     address: string;
   }) => Promise<CustomerUser>;
+  refreshUser: () => Promise<void>;
   logout: () => void;
   customerLogout: () => void;
   loading: boolean;
@@ -37,6 +48,7 @@ const AuthContext = createContext<{
     address: "",
     role: "customer",
   }),
+  refreshUser: async () => {},
   logout: () => {},
   customerLogout: () => {},
   loading: true,
@@ -66,14 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } else {
       api
         .get("/auth/me")
-        .then((res) =>
-          setUser({
-            id: res.data._id,
-            name: res.data.name,
-            email: res.data.email,
-            role: res.data.role,
-          })
-        )
+        .then((res) => setUser(mapStaffUser(res.data)))
         .catch(() => {
           localStorage.removeItem("token");
           localStorage.removeItem("authKind");
@@ -87,8 +92,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("token", data.token);
     localStorage.setItem("authKind", "staff");
     setCustomer(null);
-    setUser(data.user);
-    return data.user as User;
+    const staff = mapStaffUser(data.user);
+    setUser(staff);
+    return staff;
+  };
+
+  const refreshUser = async () => {
+    const { data } = await api.get("/auth/me");
+    setUser(mapStaffUser(data));
   };
 
   const customerLogin = async (email: string, password: string) => {
@@ -135,6 +146,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         customerLogin,
         customerRegister,
+        refreshUser,
         logout,
         customerLogout,
         loading,

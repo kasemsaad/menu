@@ -4,12 +4,14 @@ import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import api from "@/lib/api";
 import { useCart } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/useToast";
 
 export const GuestCheckout = () => {
   const { basePath } = useOutletContext<{ basePath: string }>();
   const { t } = useTranslation();
   const { items, clear, total } = useCart();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const tableId = sessionStorage.getItem("tableId");
 
   const schema = Yup.object({
@@ -23,22 +25,26 @@ export const GuestCheckout = () => {
       validationSchema={schema}
       onSubmit={async (values) => {
         if (!tableId) {
-          alert(t("scanQrFirst") || "Please scan the table QR code first");
+          showToast(t("scanQrFirst"), "warning");
           return;
         }
-        const { data } = await api.post("/orders", {
-          tableId,
-          type: "dine_in",
-          items,
-          paymentMethod: values.paymentMethod,
-          couponCode: values.couponCode || undefined,
-        });
-        clear();
-        if (values.paymentMethod === "paymob") {
-          const pay = await api.post("/payment/paymob/initiate", { orderId: data._id });
-          if (pay.data.paymentUrl) window.location.href = pay.data.paymentUrl;
+        try {
+          const { data } = await api.post("/orders", {
+            tableId,
+            type: "dine_in",
+            items,
+            paymentMethod: values.paymentMethod,
+            couponCode: values.couponCode || undefined,
+          });
+          clear();
+          if (values.paymentMethod === "paymob") {
+            const pay = await api.post("/payment/paymob/initiate", { orderId: data._id });
+            if (pay.data.paymentUrl) window.location.href = pay.data.paymentUrl;
+          }
+          navigate(`${basePath}/order/${data._id}`);
+        } catch {
+          /* global toast */
         }
-        navigate(`${basePath}/order/${data._id}`);
       }}
     >
       {({ values, setFieldValue }) => (

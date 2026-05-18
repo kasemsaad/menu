@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { Order } from "../models/Order.js";
 import { auth, requireRole } from "../middleware/auth.js";
+import { activeOrderFilter } from "../utils/orderQuery.js";
 
 const router = Router();
 
@@ -12,6 +13,7 @@ router.get("/dashboard", auth, requireRole("admin"), async (req, res) => {
   start.setHours(0, 0, 0, 0);
 
   const orders = await Order.find({
+    ...activeOrderFilter,
     createdAt: { $gte: start },
     status: { $nin: ["cancelled"] },
   });

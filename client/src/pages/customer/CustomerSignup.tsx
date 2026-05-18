@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LangToggle } from "@/components/LangToggle";
+import { getErrorMessage } from "@/lib/errors";
 
 const schema = Yup.object({
   name: Yup.string().required(),
@@ -20,7 +21,7 @@ export const CustomerSignup = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 via-white to-amber-50 p-4 dark:from-stone-950 dark:via-stone-900 dark:to-stone-950">
+    <section className="flex min-h-screen items-center justify-center bg-page-brand p-4">
       <section className="absolute end-4 top-4 flex gap-2">
         <LangToggle />
         <ThemeToggle />
@@ -35,8 +36,8 @@ export const CustomerSignup = () => {
             try {
               await customerRegister(values);
               navigate("/shop");
-            } catch {
-              setErrors({ email: "Registration failed" });
+            } catch (err) {
+              setErrors({ email: getErrorMessage(err, t("errorGeneric")) });
             }
           }}
         >

@@ -15,11 +15,13 @@ import {
 } from "recharts";
 import api from "@/lib/api";
 import { useRealtimeOrders } from "@/hooks/useRealtimeOrders";
-
-const COLORS = ["#ea580c", "#f97316", "#fdba74", "#fed7aa"];
+import { useSettings } from "@/contexts/SettingsContext";
+import { getBrandChartColors } from "@/lib/colors";
 
 export const AdminDashboard = () => {
   const { t } = useTranslation();
+  useSettings();
+  const COLORS = getBrandChartColors();
   const [data, setData] = useState<{
     summary: { revenue: number; orderCount: number; avgOrder: number };
     dailySales: { date: string; revenue: number; orders: number }[];
@@ -65,7 +67,7 @@ export const AdminDashboard = () => {
             <XAxis dataKey="date" tick={{ fontSize: 10 }} />
             <YAxis />
             <Tooltip />
-            <Line type="monotone" dataKey="revenue" stroke="#ea580c" strokeWidth={2} />
+            <Line type="monotone" dataKey="revenue" stroke={COLORS[0]} strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       </section>
@@ -77,7 +79,7 @@ export const AdminDashboard = () => {
               <XAxis dataKey="name" tick={{ fontSize: 10 }} />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="qty" fill="#ea580c" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="qty" fill={COLORS[0]} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </section>
@@ -88,7 +90,7 @@ export const AdminDashboard = () => {
               <XAxis dataKey="hour" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="orders" fill="#f97316" />
+              <Bar dataKey="orders" fill={COLORS[1]} />
             </BarChart>
           </ResponsiveContainer>
         </section>

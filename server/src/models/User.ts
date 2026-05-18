@@ -10,6 +10,10 @@ export interface IUser extends Document {
   branchId?: mongoose.Types.ObjectId;
   phone?: string;
   isActive: boolean;
+  onShift: boolean;
+  shiftStartedAt?: Date;
+  /** Waiter only: tables covered during active shift */
+  assignedTableIds: mongoose.Types.ObjectId[];
 }
 
 const userSchema = new Schema<IUser>(
@@ -25,6 +29,9 @@ const userSchema = new Schema<IUser>(
     branchId: { type: Schema.Types.ObjectId, ref: "Branch" },
     phone: String,
     isActive: { type: Boolean, default: true },
+    onShift: { type: Boolean, default: false },
+    shiftStartedAt: Date,
+    assignedTableIds: [{ type: Schema.Types.ObjectId, ref: "Table" }],
   },
   { timestamps: true }
 );

@@ -79,6 +79,10 @@ async function seed() {
     deliveryFee: 25,
     whatsappNumber: process.env.WHATSAPP_NUMBER || "201234567890",
     restaurantName: { en: "Brew & Bite Cafe", ar: "مقهى برو آند بايت" },
+    primaryColor: "#ea580c",
+    accentColor: "#f97316",
+    openTime: "09:00",
+    closeTime: "23:00",
   });
 
   await Coupon.deleteMany({});

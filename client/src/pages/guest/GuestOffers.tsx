@@ -18,7 +18,7 @@ export const GuestOffers = () => {
       {offers.map((o) => (
         <article
           key={o._id}
-          className="overflow-hidden rounded-2xl bg-gradient-to-r from-brand-600 to-amber-500 p-5 text-white shadow-lg"
+          className="overflow-hidden rounded-2xl bg-hero-brand p-5 text-white shadow-lg"
         >
           <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold">
             -{o.discountPercent}%

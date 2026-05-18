@@ -4,6 +4,7 @@ import cors from "cors";
 import http from "http";
 import { connectDB } from "./config/db.js";
 import { initSocket } from "./socket/index.js";
+import { startClosingPurgeJob } from "./jobs/closingPurge.js";
 
 import authRoutes from "./routes/auth.js";
 import categoryRoutes from "./routes/categories.js";
@@ -48,6 +49,7 @@ const PORT = process.env.PORT || 8080;
 
 connectDB()
   .then(() => {
+    startClosingPurgeJob();
     server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch((err) => {
