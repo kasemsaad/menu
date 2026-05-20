@@ -2,6 +2,7 @@ import { Router } from "express";
 import { Product } from "../models/Product.js";
 import { Review } from "../models/Review.js";
 import { auth, requireRole } from "../middleware/auth.js";
+import { syncProductRating } from "../utils/productRating.js";
 
 const router = Router();
 
@@ -56,14 +57,9 @@ router.post("/:id/reviews", async (req, res) => {
   if (!product) return res.status(404).json({ message: "Not found" });
 
   await Review.create({ productId: product.id, rating, comment, tableNumber });
-
-  const reviews = await Review.find({ productId: product.id });
-  const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
-  product.rating = Math.round(avg * 10) / 10;
-  product.ratingCount = reviews.length;
-  await product.save();
-
-  res.status(201).json({ rating: product.rating, ratingCount: product.ratingCount });
+  await syncProductRating(product.id);
+  const updated = await Product.findById(product.id);
+  res.status(201).json({ rating: updated?.rating ?? 0, ratingCount: updated?.ratingCount ?? 0 });
 });
 
 export default router;

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import mongoose from "mongoose";
-import { Order } from "../models/Order.js";
+import { Order, IOrder } from "../models/Order.js";
 import { Table } from "../models/Table.js";
 import { Coupon } from "../models/Coupon.js";
 import { Settings } from "../models/Settings.js";
@@ -12,10 +12,11 @@ import { User } from "../models/User.js";
 import { customerAuth, CustomerAuthRequest } from "../middleware/customerAuth.js";
 import { optionalCustomerAuth } from "../middleware/optionalCustomerAuth.js";
 import { activeOrderFilter } from "../utils/orderQuery.js";
+import { buildTableCheck } from "../utils/tableCheck.js";
 
 const router = Router();
 
-const serializeOrder = (order: Awaited<ReturnType<typeof Order.findById>>) => {
+const serializeOrder = (order: IOrder | null) => {
   if (!order) return null;
   const o = order.toObject() as Record<string, unknown>;
   const tableId = o.tableId as { number?: number } | string | undefined;
@@ -218,22 +219,21 @@ router.post("/:id/call-waiter", async (req, res) => {
 });
 
 router.post("/:id/request-bill", async (req, res) => {
-  const order = await Order.findOne({ _id: req.params.id, ...activeOrderFilter }).populate(
-    "tableId",
-    "number"
-  );
+  const order = await Order.findOne({ _id: req.params.id, ...activeOrderFilter });
   if (!order) return res.status(404).json({ message: "Not found" });
-  const serialized = serializeOrder(order);
-  if (order.tableId) {
-    const tid = typeof order.tableId === "object" ? order.tableId._id : order.tableId;
-    await Table.findByIdAndUpdate(tid, { status: "needs_bill" });
-    await emitWaiterTableNotification(tid.toString(), {
-      type: "request_bill",
-      order: serialized,
-    });
-    emitNotification("admin", { type: "request_bill", order: serialized });
+  if (!order.tableId) {
+    return res.status(400).json({ message: "Not a table order" });
   }
-  res.json({ message: "Bill requested", order: serialized });
+  const tid = order.tableId.toString();
+  const check = await buildTableCheck(tid);
+  if (!check?.orderCount) {
+    return res.status(400).json({ message: "No active orders on this table" });
+  }
+  await Table.findByIdAndUpdate(tid, { status: "needs_bill" });
+  const payload = { type: "request_bill", tableCheck: check, order: serializeOrder(order) };
+  await emitWaiterTableNotification(tid, payload);
+  emitNotification("admin", payload);
+  res.json({ message: "Bill requested", tableCheck: check });
 });
 
 export default router;

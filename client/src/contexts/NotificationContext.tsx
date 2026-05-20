@@ -100,12 +100,23 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       if (role !== "waiter" || !user.onShift) return false;
       const tid = getOrderTableId(order);
       if (!tid || !user.assignedTableIds?.length) return false;
-      return user.assignedTableIds.includes(tid);
+      return user.assignedTableIds.some((id) => String(id) === tid);
     };
 
     const chefHandles = () => role === "chef" && Boolean(user.onShift);
 
-    const onNotification = (payload: { type?: string; order?: Order }) => {
+    const waiterHandlesTable = (tableId?: string, order?: Order) => {
+      if (role !== "waiter" || !user.onShift) return false;
+      const tid = tableId ?? getOrderTableId(order);
+      if (!tid || !user.assignedTableIds?.length) return false;
+      return user.assignedTableIds.some((id) => String(id) === tid);
+    };
+
+    const onNotification = (payload: {
+      type?: string;
+      order?: Order;
+      tableCheck?: { tableId?: string; tableNumber?: number; grandTotal?: number };
+    }) => {
       const num = orderLabel(payload.order);
       switch (payload.type) {
         case "new_order":
@@ -129,11 +140,13 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           break;
         }
         case "request_bill": {
-          const table = getOrderTableNumber(payload.order) ?? "?";
-          if (waiterHandles(payload.order))
-            notifySound("urgent", t("notifRequestBill", { table }), "warning");
+          const check = payload.tableCheck;
+          const table = check?.tableNumber ?? getOrderTableNumber(payload.order) ?? "?";
+          const total = check?.grandTotal != null ? ` — ${check.grandTotal} EGP` : "";
+          if (waiterHandlesTable(check?.tableId, payload.order))
+            notifySound("urgent", `${t("notifRequestBill", { table })}${total}`, "warning");
           if (role === "admin")
-            notifySound("urgent", t("notifRequestBillAdmin", { table }), "warning");
+            notifySound("urgent", `${t("notifRequestBillAdmin", { table })}${total}`, "warning");
           break;
         }
         case "order_status":
@@ -177,7 +190,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       {user && (
         <button
           type="button"
-          className="fixed bottom-24 end-4 z-[99] flex h-11 w-11 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg md:bottom-6"
+          className="bg-brand-solid fixed bottom-24 end-4 z-[99] flex h-11 w-11 items-center justify-center rounded-full shadow-lg md:bottom-6"
           title={soundEnabled ? t("soundOn") : t("soundOff")}
           onClick={() => toggleSound(!soundEnabled)}
         >
@@ -185,7 +198,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         </button>
       )}
       {toasts.length > 0 && (
-        <section className="pointer-events-none fixed end-4 top-4 z-[100] flex w-[min(100%,22rem)] flex-col gap-2">
+        <section className="pointer-events-none fixed end-4 top-4 z-[200] flex w-[min(100%,22rem)] flex-col gap-2">
           {user && (
             <p className="pointer-events-none flex items-center gap-1 text-xs font-medium text-stone-500">
               <Bell size={14} /> {t("notifications")}

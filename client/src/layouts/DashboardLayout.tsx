@@ -8,6 +8,7 @@ import {
   Users,
   Ticket,
   BarChart3,
+  Star,
   Settings,
   LogOut,
   ChefHat,
@@ -26,6 +27,7 @@ const adminLinks = [
   { to: "/admin/tables", icon: Table2, label: "tables" },
   { to: "/admin/users", icon: Users, label: "users" },
   { to: "/admin/coupons", icon: Ticket, label: "coupons" },
+  { to: "/admin/reviews", icon: Star, label: "reviews" },
   { to: "/admin/analytics", icon: BarChart3, label: "analytics" },
   { to: "/admin/settings", icon: Settings, label: "settings" },
 ];
@@ -59,7 +61,7 @@ export const DashboardLayout = ({ role }: { role: "admin" | "chef" | "waiter" | 
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                   isActive
-                    ? "bg-brand-600 text-white"
+                    ? "nav-link-active"
                     : "text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
                 }`
               }

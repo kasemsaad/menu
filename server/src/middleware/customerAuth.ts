@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { Customer } from "../models/Customer.js";
 
-export interface CustomerAuthRequest extends Request {
+export type CustomerAuthRequest = Request & {
   customer?: { id: string; role: "customer" };
-}
+};
 
 export const customerAuth = async (
   req: CustomerAuthRequest,

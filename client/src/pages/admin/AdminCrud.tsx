@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Formik, Form, Field, FieldArray } from "formik";
 import api from "@/lib/api";
 import type { AdminUser, Category, Coupon, Product, TableInfo, UserRole } from "@/types";
-import { QrCode, Plus, Trash2, Pencil, ImagePlus, Users, Ticket } from "lucide-react";
+import { QrCode, Plus, Trash2, Pencil, ImagePlus, Users, Ticket, Receipt } from "lucide-react";
+import { TableCheckModal } from "@/components/TableCheckModal";
 
 type Resource = "categories" | "products" | "tables" | "users" | "coupons";
 
@@ -500,6 +501,7 @@ export const AdminCrud = ({ resource }: { resource: Resource }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [qrPreview, setQrPreview] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [checkTableId, setCheckTableId] = useState<string | null>(null);
 
   const load = () => api.get(endpoints[resource]).then((r) => setItems(r.data));
 
@@ -708,6 +710,14 @@ export const AdminCrud = ({ resource }: { resource: Resource }) => {
           </span>
         </div>
         <div className="flex shrink-0 gap-2">
+          <button
+            type="button"
+            className="btn-outline p-2"
+            onClick={() => setCheckTableId(item._id)}
+            title={t("tableCheck")}
+          >
+            <Receipt size={18} />
+          </button>
           <button type="button" className="btn-outline p-2" onClick={() => showQr(item._id)} title="QR">
             <QrCode size={18} />
           </button>
@@ -989,6 +999,14 @@ export const AdminCrud = ({ resource }: { resource: Resource }) => {
             </button>
           </Form>
         </Formik>
+      )}
+
+      {resource === "tables" && (
+        <TableCheckModal
+          tableId={checkTableId}
+          open={Boolean(checkTableId)}
+          onClose={() => setCheckTableId(null)}
+        />
       )}
     </section>
   );

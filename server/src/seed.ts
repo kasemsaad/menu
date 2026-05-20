@@ -76,6 +76,7 @@ async function seed() {
   await Settings.deleteMany({});
   await Settings.create({
     taxPercent: 14,
+    servicePercent: 15,
     deliveryFee: 25,
     whatsappNumber: process.env.WHATSAPP_NUMBER || "201234567890",
     restaurantName: { en: "Brew & Bite Cafe", ar: "مقهى برو آند بايت" },

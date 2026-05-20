@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RotateCcw } from "lucide-react";
+import { TableCheckModal } from "@/components/TableCheckModal";
 import api from "@/lib/api";
 import type { Order, TableInfo } from "@/types";
 import { OrderCard } from "@/components/OrderCard";
@@ -13,6 +14,7 @@ export const WaiterDashboard = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [tables, setTables] = useState<TableInfo[]>([]);
+  const [checkTableId, setCheckTableId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     if (!user?.onShift) {
@@ -113,6 +115,12 @@ export const WaiterDashboard = () => {
           </section>
         </>
       )}
+
+      <TableCheckModal
+        tableId={checkTableId}
+        open={Boolean(checkTableId)}
+        onClose={() => setCheckTableId(null)}
+      />
     </section>
   );
 };

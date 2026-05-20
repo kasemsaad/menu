@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next";
 import { ImagePlus } from "lucide-react";
 import api from "@/lib/api";
 import { useSettings } from "@/contexts/SettingsContext";
-import { applyBrandTheme } from "@/lib/colors";
+import { useToast } from "@/hooks/useToast";
+import { applyBrandTheme, normalizeHex } from "@/lib/colors";
 import { readFileAsDataUrl } from "@/lib/upload";
 import { SoundUploadField } from "@/components/SoundUploadField";
 import { configureNotificationSounds } from "@/lib/sounds";
@@ -14,6 +15,7 @@ type FormValues = {
   nameEn: string;
   nameAr: string;
   taxPercent: number;
+  servicePercent: number;
   deliveryFee: number;
   whatsappNumber: string;
   logo: string;
@@ -32,6 +34,7 @@ const toForm = (s: AppSettings): FormValues => ({
   nameEn: s.restaurantName?.en ?? "",
   nameAr: s.restaurantName?.ar ?? "",
   taxPercent: s.taxPercent,
+  servicePercent: s.servicePercent ?? 15,
   deliveryFee: s.deliveryFee,
   whatsappNumber: s.whatsappNumber ?? "",
   logo: s.logo ?? "",
@@ -88,6 +91,7 @@ const LogoField = ({
 export const AdminSettings = () => {
   const { t } = useTranslation();
   const { settings, refresh } = useSettings();
+  const { showToast, showError } = useToast();
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -106,31 +110,40 @@ export const AdminSettings = () => {
         initialValues={toForm(settings)}
         enableReinitialize
         onSubmit={async (v) => {
-          await api.patch("/settings", {
-            taxPercent: Number(v.taxPercent),
-            deliveryFee: Number(v.deliveryFee),
-            whatsappNumber: v.whatsappNumber,
-            restaurantName: { en: v.nameEn, ar: v.nameAr },
-            logo: v.logo || undefined,
-            primaryColor: v.primaryColor,
-            accentColor: v.accentColor,
-            openTime: v.openTime,
-            closeTime: v.closeTime,
-            notificationSounds: {
-              newOrder: v.soundNewOrder || undefined,
-              urgent: v.soundUrgent || undefined,
-              success: v.soundSuccess || undefined,
-              update: v.soundUpdate || undefined,
-            },
-            soundVolume: Number(v.soundVolume),
-          });
-          await refresh();
-          setSaved(true);
+          const primary = normalizeHex(v.primaryColor);
+          const accent = normalizeHex(v.accentColor, primary);
+          try {
+            await api.patch("/settings", {
+              taxPercent: Number(v.taxPercent),
+              servicePercent: Number(v.servicePercent),
+              deliveryFee: Number(v.deliveryFee),
+              whatsappNumber: v.whatsappNumber,
+              restaurantName: { en: v.nameEn, ar: v.nameAr },
+              logo: v.logo || undefined,
+              primaryColor: primary,
+              accentColor: accent,
+              openTime: v.openTime,
+              closeTime: v.closeTime,
+              notificationSounds: {
+                newOrder: v.soundNewOrder || undefined,
+                urgent: v.soundUrgent || undefined,
+                success: v.soundSuccess || undefined,
+                update: v.soundUpdate || undefined,
+              },
+              soundVolume: Number(v.soundVolume),
+            });
+            applyBrandTheme(primary, accent);
+            await refresh();
+            setSaved(true);
+            showToast(t("saved"), "success");
+          } catch (err) {
+            showError(err);
+          }
         }}
       >
         {({ values, setFieldValue }) => {
-          const previewTheme = () => {
-            applyBrandTheme(values.primaryColor, values.accentColor);
+          const applyPreview = (primary: string, accent: string) => {
+            applyBrandTheme(primary, accent);
             configureNotificationSounds(
               {
                 newOrder: values.soundNewOrder || undefined,
@@ -155,8 +168,9 @@ export const AdminSettings = () => {
                         type="color"
                         value={values.primaryColor}
                         onChange={(e) => {
-                          setFieldValue("primaryColor", e.target.value);
-                          previewTheme();
+                          const next = e.target.value;
+                          setFieldValue("primaryColor", next);
+                          applyPreview(next, values.accentColor);
                         }}
                         className="h-10 w-14 cursor-pointer rounded-lg border border-stone-200"
                       />
@@ -166,8 +180,9 @@ export const AdminSettings = () => {
                         className="input-field font-mono uppercase"
                         value={values.primaryColor}
                         onChange={(e) => {
-                          setFieldValue("primaryColor", e.target.value);
-                          previewTheme();
+                          const next = e.target.value;
+                          setFieldValue("primaryColor", next);
+                          applyPreview(next, values.accentColor);
                         }}
                       />
                     </div>
@@ -179,8 +194,9 @@ export const AdminSettings = () => {
                         type="color"
                         value={values.accentColor}
                         onChange={(e) => {
-                          setFieldValue("accentColor", e.target.value);
-                          previewTheme();
+                          const next = e.target.value;
+                          setFieldValue("accentColor", next);
+                          applyPreview(values.primaryColor, next);
                         }}
                         className="h-10 w-14 cursor-pointer rounded-lg border border-stone-200"
                       />
@@ -190,18 +206,28 @@ export const AdminSettings = () => {
                         className="input-field font-mono uppercase"
                         value={values.accentColor}
                         onChange={(e) => {
-                          setFieldValue("accentColor", e.target.value);
-                          previewTheme();
+                          const next = e.target.value;
+                          setFieldValue("accentColor", next);
+                          applyPreview(values.primaryColor, next);
                         }}
                       />
                     </div>
                   </label>
                 </div>
                 <div className="flex flex-wrap gap-2 rounded-xl bg-stone-50 p-3 dark:bg-stone-800/50">
-                  <span className="rounded-lg bg-brand-600 px-3 py-1 text-xs font-medium text-white">
+                  <span
+                    className="rounded-lg px-3 py-1 text-xs font-medium text-white"
+                    style={{ backgroundColor: values.primaryColor }}
+                  >
                     Primary
                   </span>
-                  <span className="rounded-lg bg-brand-100 px-3 py-1 text-xs font-medium text-brand-800">
+                  <span
+                    className="rounded-lg px-3 py-1 text-xs font-medium"
+                    style={{
+                      backgroundColor: `color-mix(in srgb, ${values.primaryColor} 18%, white)`,
+                      color: values.primaryColor,
+                    }}
+                  >
                     Light
                   </span>
                   <span
@@ -247,7 +273,7 @@ export const AdminSettings = () => {
                   value={values.soundNewOrder}
                   onChange={(url) => {
                     setFieldValue("soundNewOrder", url);
-                    previewTheme();
+                    applyPreview(values.primaryColor, values.accentColor);
                   }}
                 />
                 <SoundUploadField
@@ -256,7 +282,7 @@ export const AdminSettings = () => {
                   value={values.soundUrgent}
                   onChange={(url) => {
                     setFieldValue("soundUrgent", url);
-                    previewTheme();
+                    applyPreview(values.primaryColor, values.accentColor);
                   }}
                 />
                 <SoundUploadField
@@ -265,7 +291,7 @@ export const AdminSettings = () => {
                   value={values.soundSuccess}
                   onChange={(url) => {
                     setFieldValue("soundSuccess", url);
-                    previewTheme();
+                    applyPreview(values.primaryColor, values.accentColor);
                   }}
                 />
                 <SoundUploadField
@@ -274,7 +300,7 @@ export const AdminSettings = () => {
                   value={values.soundUpdate}
                   onChange={(url) => {
                     setFieldValue("soundUpdate", url);
-                    previewTheme();
+                    applyPreview(values.primaryColor, values.accentColor);
                   }}
                 />
               </section>
@@ -283,8 +309,19 @@ export const AdminSettings = () => {
                 <h2 className="font-semibold">{t("settings")}</h2>
                 <Field name="nameEn" className="input-field" placeholder="Restaurant EN" />
                 <Field name="nameAr" className="input-field" placeholder="Restaurant AR" />
-                <Field name="taxPercent" type="number" className="input-field" />
-                <Field name="deliveryFee" type="number" className="input-field" />
+                <label className="space-y-1 text-sm">
+                  <span className="font-medium">{t("taxPercent")}</span>
+                  <Field name="taxPercent" type="number" min={0} className="input-field" />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="font-medium">{t("servicePercent")}</span>
+                  <Field name="servicePercent" type="number" min={0} max={100} className="input-field" />
+                  <p className="text-xs text-stone-500">{t("servicePercentHint")}</p>
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="font-medium">{t("deliveryFee")}</span>
+                  <Field name="deliveryFee" type="number" min={0} className="input-field" />
+                </label>
                 <Field name="whatsappNumber" className="input-field" />
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="space-y-1 text-sm">

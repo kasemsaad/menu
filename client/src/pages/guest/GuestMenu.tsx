@@ -40,7 +40,7 @@ export const GuestMenu = () => {
         <button
           type="button"
           onClick={() => setActive("")}
-          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${!active ? "bg-brand-600 text-white" : "bg-stone-100 dark:bg-stone-800"}`}
+          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${!active ? "bg-brand-solid" : "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-200"}`}
         >
           {t("allCategories")}
         </button>
@@ -49,7 +49,7 @@ export const GuestMenu = () => {
             key={c._id}
             type="button"
             onClick={() => setActive(c._id)}
-            className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${active === c._id ? "bg-brand-600 text-white" : "bg-stone-100 dark:bg-stone-800"}`}
+            className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${active === c._id ? "bg-brand-solid" : "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-200"}`}
           >
             {loc(c.name, i18n.language)}
           </button>

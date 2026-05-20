@@ -143,8 +143,34 @@ export interface NotificationSounds {
   update?: string;
 }
 
+export interface Review {
+  _id: string;
+  productId: string | { _id: string; name: Localized };
+  rating: number;
+  comment?: string;
+  tableNumber?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface TableCheck {
+  tableId: string;
+  tableNumber: number;
+  servicePercent: number;
+  orderCount: number;
+  orders: Order[];
+  subtotal: number;
+  discount: number;
+  tax: number;
+  ordersTotal: number;
+  preService: number;
+  serviceCharge: number;
+  grandTotal: number;
+}
+
 export interface AppSettings {
   taxPercent: number;
+  servicePercent?: number;
   deliveryFee: number;
   currency: string;
   whatsappNumber: string;

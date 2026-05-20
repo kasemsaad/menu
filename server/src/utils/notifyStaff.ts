@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { User } from "../models/User.js";
 import { getIO } from "../socket/index.js";
 
@@ -5,8 +6,9 @@ export const tableIdFromOrder = (order: unknown): string | null => {
   const o = order as { tableId?: unknown; tableNumber?: number };
   const tid = o.tableId;
   if (tid == null) return null;
-  if (typeof tid === "object" && tid !== null && "_id" in tid) {
-    const id = (tid as { _id: unknown })._id;
+  if (typeof tid === "object" && tid !== null) {
+    const rec = tid as { _id?: unknown; id?: unknown };
+    const id = rec._id ?? rec.id;
     return id != null ? String(id) : null;
   }
   return String(tid);
@@ -14,12 +16,13 @@ export const tableIdFromOrder = (order: unknown): string | null => {
 
 export const notifyWaitersForTable = async (tableId: string | null, payload: unknown) => {
   const io = getIO();
-  if (!io || !tableId) return;
+  if (!io || !tableId || !mongoose.isValidObjectId(tableId)) return;
+  const tableOid = new mongoose.Types.ObjectId(tableId);
   const waiters = await User.find({
     role: "waiter",
     onShift: true,
     isActive: true,
-    assignedTableIds: tableId,
+    assignedTableIds: tableOid,
   });
   for (const w of waiters) {
     io.to(`staff:${w._id}`).emit("notification", payload);
@@ -31,13 +34,14 @@ export const emitOrderUpdatedToStaff = async (order: unknown) => {
   if (!io) return;
   const tid = tableIdFromOrder(order);
   io.to("role:admin").to("role:delivery").emit("order:updated", order);
-  if (tid) {
+  if (tid && mongoose.isValidObjectId(tid)) {
+    const tableOid = new mongoose.Types.ObjectId(tid);
     io.to(`table:${tid}`).emit("order:updated", order);
     const waiters = await User.find({
       role: "waiter",
       onShift: true,
       isActive: true,
-      assignedTableIds: tid,
+      assignedTableIds: tableOid,
     });
     for (const w of waiters) {
       io.to(`staff:${w._id}`).emit("order:updated", order);

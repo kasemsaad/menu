@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { User, UserRole } from "../models/User.js";
 
-export interface AuthRequest extends Request {
+export type AuthRequest = Request & {
   user?: { id: string; role: UserRole; branchId?: string };
-}
+};
 
 export const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const header = req.headers.authorization;

@@ -25,6 +25,7 @@ import { DeliveryDashboard } from "@/pages/delivery/DeliveryDashboard";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
 import { AdminCrud } from "@/pages/admin/AdminCrud";
 import { AdminSettings } from "@/pages/admin/AdminSettings";
+import { AdminReviews } from "@/pages/admin/AdminReviews";
 
 const App = () => (
   <ThemeProvider>
@@ -98,6 +99,7 @@ const App = () => (
             <Route path="tables" element={<AdminCrud resource="tables" />} />
             <Route path="users" element={<AdminCrud resource="users" />} />
             <Route path="coupons" element={<AdminCrud resource="coupons" />} />
+            <Route path="reviews" element={<AdminReviews />} />
             <Route path="analytics" element={<AdminDashboard />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>

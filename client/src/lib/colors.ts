@@ -1,5 +1,6 @@
 const DEFAULT_PRIMARY = "#ea580c";
 const DEFAULT_ACCENT = "#f97316";
+const STYLE_ID = "brand-theme-vars";
 
 const clamp = (n: number) => Math.max(0, Math.min(255, Math.round(n)));
 
@@ -18,9 +19,9 @@ export const normalizeHex = (hex?: string, fallback = DEFAULT_PRIMARY) => {
 };
 
 export const hexToRgb = (hex: string) => {
-  const normalized = normalizeHex(hex, DEFAULT_PRIMARY);
+  const normalized = normalizeHex(hex, "");
+  if (normalized === "") return null;
   const clean = normalized.replace("#", "");
-  if (clean.length !== 6) return null;
   return {
     r: parseInt(clean.slice(0, 2), 16),
     g: parseInt(clean.slice(2, 4), 16),
@@ -42,7 +43,7 @@ const mix = (hex: string, target: { r: number; g: number; b: number }, amount: n
 };
 
 export const generateBrandScale = (primary: string) => {
-  const base = hexToRgb(primary) ? primary : DEFAULT_PRIMARY;
+  const base = normalizeHex(primary, DEFAULT_PRIMARY);
   const white = { r: 255, g: 255, b: 255 };
   const black = { r: 0, g: 0, b: 0 };
   return {
@@ -59,11 +60,6 @@ export const generateBrandScale = (primary: string) => {
   };
 };
 
-const toRgbVar = (hex: string) => {
-  const rgb = hexToRgb(hex);
-  return rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : null;
-};
-
 export const applyBrandTheme = (primary?: string, accent?: string) => {
   const primaryHex = normalizeHex(primary, DEFAULT_PRIMARY);
   const accentHex = normalizeHex(accent, normalizeHex(primary, DEFAULT_ACCENT));
@@ -71,17 +67,50 @@ export const applyBrandTheme = (primary?: string, accent?: string) => {
   if (hexToRgb(accentHex)) scale[500] = accentHex;
 
   const root = document.documentElement;
+  const vars: string[] = [];
+
   Object.entries(scale).forEach(([key, value]) => {
     root.style.setProperty(`--brand-${key}`, value);
-    const rgb = toRgbVar(value);
-    if (rgb) root.style.setProperty(`--brand-${key}-rgb`, rgb);
+    vars.push(`--brand-${key}: ${value};`);
   });
+
   root.style.setProperty("--brand-accent", accentHex);
-  const accentRgb = toRgbVar(accentHex);
-  if (accentRgb) root.style.setProperty("--brand-accent-rgb", accentRgb);
-  root.style.setProperty("--brand-gradient-from", scale[600]);
-  root.style.setProperty("--brand-gradient-mid", scale[500]);
-  root.style.setProperty("--brand-gradient-to", accentHex);
+  vars.push(`--brand-accent: ${accentHex};`);
+
+  const gradientFrom = scale[600];
+  const gradientMid = scale[500];
+  const gradientTo = accentHex;
+  root.style.setProperty("--brand-gradient-from", gradientFrom);
+  root.style.setProperty("--brand-gradient-mid", gradientMid);
+  root.style.setProperty("--brand-gradient-to", gradientTo);
+  vars.push(`--brand-gradient-from: ${gradientFrom};`);
+  vars.push(`--brand-gradient-mid: ${gradientMid};`);
+  vars.push(`--brand-gradient-to: ${gradientTo};`);
+
+  let styleEl = document.getElementById(STYLE_ID) as HTMLStyleElement | null;
+  if (!styleEl) {
+    styleEl = document.createElement("style");
+    styleEl.id = STYLE_ID;
+    document.head.appendChild(styleEl);
+  }
+  styleEl.textContent = `:root, html { ${vars.join(" ")} }`;
+
+  try {
+    sessionStorage.setItem("brandPrimary", primaryHex);
+    sessionStorage.setItem("brandAccent", accentHex);
+  } catch {
+    /* ignore */
+  }
+};
+
+export const reapplyStoredBrandTheme = () => {
+  try {
+    const primary = sessionStorage.getItem("brandPrimary");
+    const accent = sessionStorage.getItem("brandAccent");
+    if (primary) applyBrandTheme(primary, accent ?? undefined);
+  } catch {
+    /* ignore */
+  }
 };
 
 export const getBrandCssColor = (varName: string) => {

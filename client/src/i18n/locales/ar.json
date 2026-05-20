@@ -122,6 +122,21 @@
   "soundSuccess": "نجاح",
   "soundUpdate": "تحديث",
   "invalidCredentials": "بيانات الدخول غير صحيحة",
+  "unauthorized": "انتهت الجلسة أو غير مصرح. يرجى تسجيل الدخول مرة أخرى.",
   "errorGeneric": "حدث خطأ ما",
-  "thanksRating": "شكراً لتقييمك!"
+  "thanksRating": "شكراً لتقييمك!",
+  "reviews": "التقييمات",
+  "reviewsHint": "تعديل أو حذف تقييمات العملاء. متوسط التقييم يُحدَّث تلقائياً.",
+  "rating": "التقييم",
+  "comment": "تعليق",
+  "noReviews": "لا توجد تقييمات",
+  "deleteReviewConfirm": "حذف هذا التقييم؟",
+  "servicePercent": "رسوم الخدمة (%)",
+  "servicePercentHint": "تُحسب مرة واحدة على إجمالي فاتورة الطاولة (كل الطلبات النشطة)، وليس على كل طلب.",
+  "serviceCharge": "رسوم الخدمة",
+  "grandTotal": "الإجمالي النهائي",
+  "tableCheck": "الحساب",
+  "noTableOrders": "لا توجد طلبات نشطة على هذه الطاولة",
+  "taxPercent": "الضريبة (%)",
+  "loading": "جاري التحميل"
 }

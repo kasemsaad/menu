@@ -21,11 +21,19 @@ api.interceptors.response.use(
   (res) => res,
   (error) => {
     const url = String(error.config?.url ?? "");
-    const skip =
-      error.config?.skipErrorToast ||
-      url.includes("/auth/login") ||
-      url.includes("/auth/customer/login");
+    const isLoginAttempt =
+      url.includes("/auth/login") || url.includes("/auth/customer/login");
+    const skip = error.config?.skipErrorToast || isLoginAttempt;
     if (!skip) reportError(error);
+
+    if (error.response?.status === 401 && !isLoginAttempt) {
+      const kind = localStorage.getItem("authKind");
+      if (kind === "staff" || kind === "customer") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("authKind");
+      }
+    }
+
     return Promise.reject(error);
   }
 );

@@ -2,6 +2,8 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface ISettings extends Document {
   taxPercent: number;
+  /** Dine-in service charge % applied on combined table bill at checkout */
+  servicePercent: number;
   deliveryFee: number;
   currency: string;
   whatsappNumber: string;
@@ -24,6 +26,7 @@ export interface ISettings extends Document {
 const settingsSchema = new Schema<ISettings>(
   {
     taxPercent: { type: Number, default: 14 },
+    servicePercent: { type: Number, default: 15 },
     deliveryFee: { type: Number, default: 25 },
     currency: { type: String, default: "EGP" },
     whatsappNumber: String,

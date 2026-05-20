@@ -5,7 +5,11 @@ export const getErrorMessage = (error: unknown, fallback?: string): string => {
     const data = error.response?.data as { message?: string | string[] } | undefined;
     if (typeof data?.message === "string" && data.message) return data.message;
     if (Array.isArray(data?.message) && data.message.length) return data.message.join(", ");
-    if (error.response?.status === 401) return "Invalid credentials";
+    if (error.response?.status === 401) {
+      const msg = data?.message;
+      if (typeof msg === "string" && msg) return msg;
+      return "Session expired or unauthorized. Please sign in again.";
+    }
     if (error.response?.status === 403) return "You do not have permission for this action";
     if (error.response?.status === 404) return "Not found";
     if (error.response?.status === 400) return "Invalid request";

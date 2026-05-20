@@ -49,6 +49,8 @@ export interface IOrder extends Document {
   callWaiter: boolean;
   branchId?: mongoose.Types.ObjectId;
   deletedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const orderItemSchema = new Schema<IOrderItem>({

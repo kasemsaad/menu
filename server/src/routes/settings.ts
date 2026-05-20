@@ -14,9 +14,37 @@ router.get("/", async (_req, res) => {
 });
 
 router.patch("/", auth, requireRole("admin"), async (req, res) => {
+  const {
+    taxPercent,
+    servicePercent,
+    deliveryFee,
+    whatsappNumber,
+    restaurantName,
+    logo,
+    primaryColor,
+    accentColor,
+    openTime,
+    closeTime,
+    notificationSounds,
+    soundVolume,
+  } = req.body;
+
   let settings = await Settings.findOne();
-  if (!settings) settings = await Settings.create(req.body);
-  else Object.assign(settings, req.body);
+  if (!settings) settings = await Settings.create({});
+
+  if (taxPercent !== undefined) settings.taxPercent = taxPercent;
+  if (servicePercent !== undefined) settings.servicePercent = servicePercent;
+  if (deliveryFee !== undefined) settings.deliveryFee = deliveryFee;
+  if (whatsappNumber !== undefined) settings.whatsappNumber = whatsappNumber;
+  if (restaurantName !== undefined) settings.restaurantName = restaurantName;
+  if (logo !== undefined) settings.logo = logo;
+  if (primaryColor !== undefined) settings.primaryColor = primaryColor;
+  if (accentColor !== undefined) settings.accentColor = accentColor;
+  if (openTime !== undefined) settings.openTime = openTime;
+  if (closeTime !== undefined) settings.closeTime = closeTime;
+  if (notificationSounds !== undefined) settings.notificationSounds = notificationSounds;
+  if (soundVolume !== undefined) settings.soundVolume = soundVolume;
+
   await settings.save();
   res.json(settings);
 });

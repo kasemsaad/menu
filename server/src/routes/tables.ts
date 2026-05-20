@@ -6,10 +6,11 @@ import { Order } from "../models/Order.js";
 import { User } from "../models/User.js";
 import { auth, requireRole, AuthRequest } from "../middleware/auth.js";
 import { activeOrderFilter } from "../utils/orderQuery.js";
-import { emitTableCleared } from "../socket/index.js";
+import { emitTableCleared, emitNotification, emitWaiterTableNotification } from "../socket/index.js";
+import { buildTableCheck } from "../utils/tableCheck.js";
 
 const router = Router();
-const clientUrl = () => process.env.CLIENT_URL || "http://localhost:5173";
+const clientUrl = () => process.env.CLIENT_URL;
 
 router.get("/", auth, requireRole("admin", "waiter"), async (req: AuthRequest, res) => {
   const filter: Record<string, unknown> = {};
@@ -75,6 +76,33 @@ router.patch("/:id/status", auth, requireRole("admin", "waiter"), async (req: Au
   res.json(table);
 });
 
+/** Combined bill for all active dine-in orders on this table (incl. service %). */
+router.get("/:id/check", auth, requireRole("admin", "waiter"), async (req: AuthRequest, res) => {
+  if (req.user?.role === "waiter") {
+    const waiter = await User.findById(req.user.id);
+    if (!waiter?.onShift) return res.status(403).json({ message: "Start your shift first" });
+    const allowed = waiter.assignedTableIds?.some((id) => id.toString() === req.params.id);
+    if (!allowed) return res.status(403).json({ message: "Table not in your assignment" });
+  }
+  const check = await buildTableCheck(req.params.id);
+  if (!check) return res.status(404).json({ message: "Not found" });
+  res.json(check);
+});
+
+/** Guest or staff: request bill for entire table session */
+router.post("/:id/request-bill", async (req, res) => {
+  const check = await buildTableCheck(req.params.id);
+  if (!check) return res.status(404).json({ message: "Not found" });
+  if (!check.orderCount) {
+    return res.status(400).json({ message: "No active orders on this table" });
+  }
+  await Table.findByIdAndUpdate(req.params.id, { status: "needs_bill" });
+  const payload = { type: "request_bill", tableCheck: check };
+  await emitWaiterTableNotification(req.params.id, payload);
+  emitNotification("admin", payload);
+  res.json({ message: "Bill requested", tableCheck: check });
+});
+
 /** Clear table after bill — sets available and clears waiter-call flags */
 router.post("/:id/reset", auth, requireRole("admin", "waiter"), async (req: AuthRequest, res) => {
   if (req.user?.role === "waiter") {
@@ -96,7 +124,7 @@ router.post("/:id/reset", auth, requireRole("admin", "waiter"), async (req: Auth
     { deletedAt: now, callWaiter: false }
   );
 
-  emitTableCleared(req.params.id);
+  emitTableCleared(String(req.params.id));
   res.json(table);
 });
 

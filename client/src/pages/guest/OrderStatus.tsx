@@ -75,7 +75,7 @@ export const OrderStatus = () => {
           <section key={s} className="flex flex-1 flex-col items-center">
             <span
               className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${
-                i <= current ? "bg-brand-600 text-white" : "bg-stone-200 dark:bg-stone-700"
+                i <= current ? "bg-brand-solid" : "bg-stone-200 dark:bg-stone-700"
               }`}
             >
               {i + 1}

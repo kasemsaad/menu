@@ -122,6 +122,21 @@
   "soundSuccess": "Success",
   "soundUpdate": "Update",
   "invalidCredentials": "Invalid email or password",
+  "unauthorized": "Session expired or unauthorized. Please sign in again.",
   "errorGeneric": "Something went wrong",
-  "thanksRating": "Thanks for your rating!"
+  "thanksRating": "Thanks for your rating!",
+  "reviews": "Reviews",
+  "reviewsHint": "Edit or remove customer ratings. Product averages update automatically.",
+  "rating": "Rating",
+  "comment": "Comment",
+  "noReviews": "No reviews yet",
+  "deleteReviewConfirm": "Delete this review?",
+  "servicePercent": "Service charge (%)",
+  "servicePercentHint": "Applied once on the combined table bill (all active orders), not per order.",
+  "serviceCharge": "Service charge",
+  "grandTotal": "Grand total",
+  "tableCheck": "Check",
+  "noTableOrders": "No active orders on this table",
+  "taxPercent": "Tax (%)",
+  "loading": "Loading"
 }

@@ -16,6 +16,7 @@ import couponRoutes from "./routes/coupons.js";
 import userRoutes from "./routes/users.js";
 import analyticsRoutes from "./routes/analytics.js";
 import settingsRoutes from "./routes/settings.js";
+import reviewRoutes from "./routes/reviews.js";
 import paymentRoutes from "./routes/payment.js";
 
 const app = express();
@@ -23,7 +24,7 @@ const server = http.createServer(app);
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: process.env.CLIENT_URL ,
     credentials: true,
   })
 );
@@ -41,6 +42,7 @@ app.use("/api/coupons", couponRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use("/api/payment", paymentRoutes);
 
 initSocket(server);

@@ -112,7 +112,7 @@ export const ShiftPanel = ({ role, onShiftChange }: Props) => {
                   onClick={() => toggleTable(tb._id)}
                   className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
                     on
-                      ? "bg-brand-600 text-white"
+                      ? "bg-brand-solid"
                       : "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300"
                   }`}
                 >

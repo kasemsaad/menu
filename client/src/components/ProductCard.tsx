@@ -28,7 +28,7 @@ export const ProductCard = ({ product, basePath }: Props) => {
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <h3 className="font-semibold text-stone-900 group-hover:text-brand-600 dark:text-white">
+        <h3 className="font-semibold text-stone-900 group-hover:text-brand dark:text-white">
           {loc(product.name, lang)}
         </h3>
         {product.description && (

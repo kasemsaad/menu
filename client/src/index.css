@@ -7,28 +7,20 @@
     @apply scroll-smooth;
   }
   :root {
-    --brand-50: #fff7ed;
-    --brand-50-rgb: 255, 247, 237;
-    --brand-100: #ffedd5;
-    --brand-100-rgb: 255, 237, 213;
-    --brand-200: #fed7aa;
-    --brand-200-rgb: 254, 215, 170;
-    --brand-300: #fdba74;
-    --brand-300-rgb: 253, 186, 116;
-    --brand-400: #fb923c;
-    --brand-400-rgb: 251, 146, 60;
-    --brand-500: #f97316;
-    --brand-500-rgb: 249, 115, 22;
-    --brand-600: #ea580c;
-    --brand-600-rgb: 234, 88, 12;
-    --brand-700: #c2410c;
-    --brand-700-rgb: 194, 65, 12;
-    --brand-800: #9a3412;
-    --brand-800-rgb: 154, 52, 18;
-    --brand-900: #7c2d12;
-    --brand-900-rgb: 124, 45, 18;
-    --brand-accent: #f97316;
-    --brand-accent-rgb: 249, 115, 22;
+    --brand-50: #eff6ff;
+    --brand-100: #dbeafe;
+    --brand-200: #bfdbfe;
+    --brand-300: #93c5fd;
+    --brand-400: #60a5fa;
+    --brand-500: #3b82f6;
+    --brand-600: #2563eb;
+    --brand-700: #1d4ed8;
+    --brand-800: #1e40af;
+    --brand-900: #1e3a8a;
+    --brand-accent: #38bdf8;
+    --brand-gradient-from: var(--brand-600);
+    --brand-gradient-mid: var(--brand-500);
+    --brand-gradient-to: var(--brand-accent);
   }
   body {
     @apply font-body antialiased bg-surface-light text-stone-900 dark:bg-surface-dark dark:text-stone-100;
@@ -45,18 +37,62 @@
     );
   }
   .bg-page-brand {
-    @apply bg-gradient-to-br from-brand-50 via-white to-brand-100 dark:from-stone-950 dark:via-stone-900 dark:to-stone-950;
+    background: linear-gradient(to bottom right, var(--brand-50), #ffffff, var(--brand-100));
   }
+  html.dark .bg-page-brand {
+    background: linear-gradient(to bottom right, #0f0f12, #1c1917, #0f0f12);
+  }
+
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 font-semibold text-white shadow-lg shadow-brand-600/25 transition hover:bg-brand-700 active:scale-[0.98] disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-md transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    background-color: var(--brand-600);
   }
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--brand-700);
+  }
+
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border-2 border-brand-600 px-5 py-2.5 font-semibold text-brand-600 transition hover:bg-brand-50 dark:hover:bg-stone-800 active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border-2 px-5 py-2.5 text-sm font-semibold transition active:scale-[0.98];
+    border-color: var(--brand-600);
+    color: var(--brand-600);
+    background-color: transparent;
   }
+  .btn-outline:hover:not(:disabled) {
+    background-color: var(--brand-50);
+  }
+  html.dark .btn-outline {
+    border-color: var(--brand-400);
+    color: var(--brand-400);
+  }
+  html.dark .btn-outline:hover:not(:disabled) {
+    background-color: rgb(41 37 36 / 0.8);
+  }
+
+  .nav-link-active {
+    background-color: var(--brand-600);
+    color: #ffffff !important;
+  }
+
+  .text-brand {
+    color: var(--brand-600);
+  }
+  html.dark .text-brand {
+    color: var(--brand-400);
+  }
+
+  .bg-brand-solid {
+    background-color: var(--brand-600);
+    color: #ffffff;
+  }
+
   .card {
     @apply rounded-2xl bg-white p-4 shadow-card dark:bg-stone-900 dark:shadow-card-dark;
   }
   .input-field {
-    @apply w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-stone-700 dark:bg-stone-800;
+    @apply w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-stone-900 outline-none transition dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100;
+  }
+  .input-field:focus {
+    border-color: var(--brand-500);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-500) 25%, transparent);
   }
 }

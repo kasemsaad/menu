@@ -19,7 +19,8 @@ export const getOrderTableNumber = (
 export const getOrderTableId = (order?: Pick<Order, "tableId">): string | undefined => {
   if (!order?.tableId) return undefined;
   if (typeof order.tableId === "string") return order.tableId;
-  return order.tableId._id;
+  const raw = order.tableId._id ?? (order.tableId as { id?: string }).id;
+  return raw != null ? String(raw) : undefined;
 };
 
 export const openWhatsApp = (phone: string, message: string) => {
