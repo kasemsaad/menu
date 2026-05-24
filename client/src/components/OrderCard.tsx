@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Order, OrderStatus } from "@/types";
 import { formatPrice, getOrderTableNumber } from "@/lib/utils";
 import { Clock, ChefHat } from "lucide-react";
+import { ProductDetailModal } from "./ProductDetailModal";
+import type { Product } from "@/types";
+import api from "@/lib/api";
 
 const statusColors: Record<OrderStatus, string> = {
   pending: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200",
@@ -22,6 +26,7 @@ interface Props {
 export const OrderCard = ({ order, actions, showItems = true }: Props) => {
   const { t } = useTranslation();
   const tableNum = getOrderTableNumber(order);
+  const [productIdToShow, setProductIdToShow] = useState<string | undefined>(undefined);
 
   return (
     <article className="card space-y-3">
@@ -59,17 +64,52 @@ export const OrderCard = ({ order, actions, showItems = true }: Props) => {
         </span>
       </div>
       {showItems && (
-        <ul className="space-y-1 border-t border-stone-100 pt-2 text-sm dark:border-stone-800">
+        <ul className="space-y-3 border-t border-stone-100 pt-2 text-sm dark:border-stone-800">
           {order.items.map((item, i) => (
-            <li key={i} className="flex justify-between">
-              <span>
-                {item.quantity}× {item.name.en}
-              </span>
-              <span>{formatPrice(item.subtotal)}</span>
+            <li key={i} className="space-y-1 rounded-xl bg-stone-50 p-3 dark:bg-stone-900">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">
+                      {item.quantity}× {item.name.en}
+                    </span>
+                    {/* show details button if productId present */}
+                    {typeof item.productId === "string" && (
+                      <button
+                        type="button"
+                        className="btn-outline text-xs ml-2"
+                        onClick={() => setProductIdToShow(item.productId as string)}
+                      >
+                        {t("details")}
+                      </button>
+                    )}
+                  </div>
+                  {item.notes && (
+                    <p className="text-xs text-stone-500">
+                      {t("notes")}: {item.notes}
+                    </p>
+                  )}
+                </div>
+                <span>{formatPrice(item.subtotal)}</span>
+              </div>
+              {item.addons?.length > 0 && (
+                <div className="space-y-1 text-xs text-stone-500">
+                  <p className="font-medium text-stone-700 dark:text-stone-200">{t("addons")}:</p>
+                  <ul className="space-y-1 pl-3">
+                    {item.addons.map((addon, ai) => (
+                      <li key={ai} className="flex items-center justify-between gap-3 text-stone-500">
+                        <span>{addon.name.en}</span>
+                        <span>{formatPrice(addon.price)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </li>
           ))}
         </ul>
       )}
+      <ProductDetailModal productId={productIdToShow} onClose={() => setProductIdToShow(undefined)} />
       {order.callWaiter && (
         <p className="flex items-center gap-1 text-sm font-medium text-amber-600">
           <ChefHat size={16} />

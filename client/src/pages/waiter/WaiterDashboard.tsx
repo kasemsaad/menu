@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RotateCcw } from "lucide-react";
+import { AccountSummary } from "@/components/AccountSummary";
 import { TableCheckModal } from "@/components/TableCheckModal";
 import api from "@/lib/api";
 import type { Order, TableInfo } from "@/types";
@@ -52,6 +53,22 @@ export const WaiterDashboard = () => {
       <h1 className="font-display text-2xl font-bold">Waiter — {t("orders")}</h1>
 
       <ShiftPanel role="waiter" onShiftChange={load} />
+
+      {user && (
+        <AccountSummary
+          title={t("accountDetails")}
+          rows={[
+            { label: t("name"), value: user.name },
+            { label: t("email"), value: user.email },
+            { label: t("role"), value: user.role },
+            { label: t("shift"), value: user.onShift ? t("shiftActive") : t("shiftInactive") },
+            {
+              label: t("assignedTables"),
+              value: user.assignedTableIds?.length ? `${user.assignedTableIds.length}` : t("none"),
+            },
+          ]}
+        />
+      )}
 
       {!user?.onShift ? (
         <p className="rounded-2xl bg-amber-50 px-4 py-6 text-center text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">

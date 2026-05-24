@@ -307,8 +307,14 @@ export const AdminSettings = () => {
 
               <section className="card space-y-3">
                 <h2 className="font-semibold">{t("settings")}</h2>
-                <Field name="nameEn" className="input-field" placeholder="Restaurant EN" />
-                <Field name="nameAr" className="input-field" placeholder="Restaurant AR" />
+                <label className="space-y-1 text-sm">
+                  <span className="font-medium">Restaurant Name (EN)</span>
+                  <Field name="nameEn" className="input-field" placeholder="Restaurant EN" />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="font-medium">Restaurant Name (AR)</span>
+                  <Field name="nameAr" className="input-field" placeholder="Restaurant AR" />
+                </label>
                 <label className="space-y-1 text-sm">
                   <span className="font-medium">{t("taxPercent")}</span>
                   <Field name="taxPercent" type="number" min={0} className="input-field" />
@@ -322,7 +328,10 @@ export const AdminSettings = () => {
                   <span className="font-medium">{t("deliveryFee")}</span>
                   <Field name="deliveryFee" type="number" min={0} className="input-field" />
                 </label>
-                <Field name="whatsappNumber" className="input-field" />
+                <label className="space-y-1 text-sm">
+                  <span className="font-medium">WhatsApp Number</span>
+                  <Field name="whatsappNumber" className="input-field" placeholder="+201234567890" />
+                </label>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="space-y-1 text-sm">
                     <span className="font-medium">{t("openTime")}</span>

@@ -35,6 +35,19 @@ export const ProductDetail = () => {
     );
   };
 
+  const defaultCoffeeAddons: Addon[] = [
+    { name: { en: "Extra shot", ar: "شوت إضافي" }, price: 10 },
+    { name: { en: "Oat milk", ar: "حليب شوفان" }, price: 8 },
+  ];
+
+  const productName = loc(product.name, "en").toLowerCase();
+  const isCoffeeProduct = /(cappuccino|latte|mocha|espresso|coffee|americano)/.test(productName);
+  const visibleAddons = isCoffeeProduct
+    ? [...product.addons, ...defaultCoffeeAddons].filter(
+        (a, index, list) => index === list.findIndex((x) => x.name.en === a.name.en)
+      )
+    : product.addons;
+
   const addonTotal = selectedAddons.reduce((s, a) => s + a.price, 0);
   const lineTotal = (product.price + addonTotal) * qty;
 
@@ -71,11 +84,12 @@ export const ProductDetail = () => {
           </p>
         )}
       </section>
-      {product.addons?.length > 0 && (
+      {visibleAddons?.length > 0 && (
         <section>
           <h3 className="mb-2 font-semibold">{t("addons")}</h3>
+          <p className="text-sm text-stone-500">{t("selectOptionalAddons")}</p>
           <section className="space-y-2">
-            {product.addons.map((a) => (
+            {visibleAddons.map((a) => (
               <label
                 key={a.name.en}
                 className="flex cursor-pointer items-center justify-between rounded-xl border border-stone-200 p-3 dark:border-stone-700"

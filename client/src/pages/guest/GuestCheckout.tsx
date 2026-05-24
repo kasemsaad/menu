@@ -47,7 +47,7 @@ export const GuestCheckout = () => {
         }
       }}
     >
-      {({ values, setFieldValue }) => (
+      {({ values, setFieldValue, isSubmitting }) => (
         <Form className="space-y-4">
           <section className="card space-y-2">
             <p className="flex justify-between">
@@ -79,8 +79,8 @@ export const GuestCheckout = () => {
               {t("paymob")}
             </label>
           </section>
-          <button type="submit" className="btn-primary w-full">
-            {t("confirmOrder")}
+          <button type="submit" className="btn-primary w-full" disabled={isSubmitting}>
+            {isSubmitting ? t("loading") : t("confirmOrder")}
           </button>
         </Form>
       )}

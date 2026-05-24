@@ -2,6 +2,7 @@ import { Outlet, Link, useNavigate } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { GuestBottomNav } from "@/components/GuestBottomNav";
 import { BrandLogo } from "@/components/BrandLogo";
+import { AccountSummary } from "@/components/AccountSummary";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LangToggle } from "@/components/LangToggle";
 import { useTranslation } from "react-i18next";
@@ -53,6 +54,17 @@ export const DeliveryLayout = () => {
           </section>
         </header>
         <section className="mx-auto max-w-lg px-4 py-4">
+          {customer && (
+            <AccountSummary
+              title={t("accountDetails")}
+              rows={[
+                { label: t("customerName"), value: customer.name },
+                { label: t("email"), value: customer.email },
+                { label: t("phone"), value: customer.phone },
+                { label: t("address"), value: customer.address },
+              ]}
+            />
+          )}
           <Outlet context={{ basePath, orderMode: "delivery" as const }} />
         </section>
         <GuestBottomNav basePath={basePath} />

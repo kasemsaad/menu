@@ -84,7 +84,7 @@ export const DeliveryCheckout = () => {
         navigate(`${basePath}/order/${data._id}`);
       }}
     >
-      {({ values, setFieldValue }) => (
+      {({ values, setFieldValue, isSubmitting }) => (
         <Form className="space-y-4">
           {!customer && (
             <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
@@ -154,8 +154,8 @@ export const DeliveryCheckout = () => {
               {t("paymob")}
             </label>
           </section>
-          <button type="submit" className="btn-primary w-full">
-            {t("confirmOrder")}
+          <button type="submit" className="btn-primary w-full" disabled={isSubmitting}>
+            {isSubmitting ? t("loading") : t("confirmOrder")}
           </button>
         </Form>
       )}

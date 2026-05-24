@@ -457,23 +457,45 @@ const UserFormFields = ({ isEdit }: { isEdit?: boolean }) => (
   </>
 );
 
-const CouponFormFields = () => (
-  <>
-    <Field name="code" placeholder="Code" className="input-field uppercase" />
-    <Field as="select" name="discountType" className="input-field">
-      <option value="percent">Percent %</option>
-      <option value="fixed">Fixed amount</option>
-    </Field>
-    <Field name="value" type="number" min={0} className="input-field" placeholder="Value" />
-    <Field name="minOrder" type="number" min={0} className="input-field" placeholder="Min order" />
-    <Field name="maxUses" type="number" min={1} className="input-field" placeholder="Max uses" />
-    <Field name="expiresAt" type="date" className="input-field" />
-    <label className="flex items-center gap-2 text-sm">
-      <Field type="checkbox" name="isActive" />
-      Active
-    </label>
-  </>
-);
+const CouponFormFields = () => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <label className="space-y-2 text-sm">
+        <span className="font-medium">{t("code")}</span>
+        <Field name="code" placeholder={t("code") as string} className="input-field uppercase" />
+      </label>
+      <label className="space-y-2 text-sm">
+        <span className="font-medium">{t("discountType")}</span>
+        <Field as="select" name="discountType" className="input-field">
+          <option value="percent">{t("percent")}</option>
+          <option value="fixed">{t("fixedAmount")}</option>
+        </Field>
+      </label>
+      <label className="space-y-2 text-sm">
+        <span className="font-medium">{t("value")}</span>
+        <Field name="value" type="number" min={0} className="input-field" placeholder={t("value") as string} />
+      </label>
+      <label className="space-y-2 text-sm">
+        <span className="font-medium">{t("minOrder")}</span>
+        <Field name="minOrder" type="number" min={0} className="input-field" placeholder={t("minOrder") as string} />
+      </label>
+      <label className="space-y-2 text-sm">
+        <span className="font-medium">{t("maxUses")}</span>
+        <Field name="maxUses" type="number" min={1} className="input-field" placeholder={t("maxUses") as string} />
+      </label>
+      <label className="space-y-2 text-sm">
+        <span className="font-medium">{t("expiresAt")}</span>
+        <Field name="expiresAt" type="date" className="input-field" />
+      </label>
+      <label className="flex items-center gap-2 text-sm">
+        <Field type="checkbox" name="isActive" />
+        {t("active")}
+      </label>
+    </>
+  );
+};
 
 const EditFormActions = ({
   onCancel,
