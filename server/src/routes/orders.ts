@@ -23,6 +23,14 @@ const serializeOrder = (order: IOrder | null) => {
   if (o.tableNumber == null && tableId && typeof tableId === "object" && tableId.number != null) {
     o.tableNumber = tableId.number;
   }
+  const driver = o.driverId as { _id?: unknown; name?: string; phone?: string } | string | undefined;
+  if (driver && typeof driver === "object") {
+    o.driverId = {
+      id: driver._id?.toString(),
+      name: driver.name,
+      phone: driver.phone,
+    };
+  }
   return o;
 };
 
@@ -102,16 +110,20 @@ router.post("/", optionalCustomerAuth, async (req: CustomerAuthRequest, res) => 
     status: "pending",
   });
 
-  const populated = await Order.findById(order.id).populate("tableId", "number");
+  const populated = await Order.findById(order.id)
+    .populate("tableId", "number")
+    .populate("driverId", "name phone");
   const serialized = serializeOrder(populated);
   await emitNewOrderToStaff(serialized);
   res.status(201).json(serialized);
 });
 
 router.get("/guest/:id", async (req, res) => {
-  const order = await Order.findOne({ _id: req.params.id, ...activeOrderFilter });
+  const order = await Order.findOne({ _id: req.params.id, ...activeOrderFilter })
+    .populate("tableId", "number")
+    .populate("driverId", "name phone");
   if (!order) return res.status(404).json({ message: "Not found" });
-  res.json(order);
+  res.json(serializeOrder(order));
 });
 
 /** Guest menu: all dine-in orders placed for this table (same session / QR). */
@@ -121,6 +133,7 @@ router.get("/table/:tableId", async (req, res) => {
     return res.status(400).json({ message: "Invalid table id" });
   }
   const orders = await Order.find({ tableId, type: "dine_in", ...activeOrderFilter })
+    .populate("driverId", "name phone")
     .sort({ createdAt: -1 })
     .limit(50);
   res.json(orders.map((o) => serializeOrder(o)));
@@ -152,6 +165,7 @@ router.get("/", auth, async (req: AuthRequest, res) => {
 
   const orders = await Order.find(filter)
     .populate("tableId", "number")
+    .populate("driverId", "name phone")
     .sort({ createdAt: 1 })
     .limit(100);
   res.json(orders.map((o) => serializeOrder(o)));
@@ -169,10 +183,9 @@ router.patch("/:id/status", auth, async (req: AuthRequest, res) => {
     { _id: req.params.id, ...activeOrderFilter },
     update,
     { new: true }
-  ).populate(
-    "tableId",
-    "number"
-  );
+  )
+    .populate("tableId", "number")
+    .populate("driverId", "name phone");
   if (!order) return res.status(404).json({ message: "Not found" });
 
   const serialized = serializeOrder(order);
@@ -196,9 +209,10 @@ router.patch("/:id/status", auth, async (req: AuthRequest, res) => {
 
 router.get("/my", customerAuth, async (req: CustomerAuthRequest, res) => {
   const orders = await Order.find({ customerId: req.customer!.id, ...activeOrderFilter })
+    .populate("driverId", "name phone")
     .sort({ createdAt: -1 })
     .limit(50);
-  res.json(orders);
+  res.json(orders.map((o) => serializeOrder(o)));
 });
 
 router.post("/:id/call-waiter", async (req, res) => {

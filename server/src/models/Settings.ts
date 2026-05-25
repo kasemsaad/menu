@@ -11,6 +11,8 @@ export interface ISettings extends Document {
   logo?: string;
   primaryColor: string;
   accentColor: string;
+  privacyPolicy?: { en: string; ar: string };
+  termsAndConditions?: { en: string; ar: string };
   openTime: string;
   closeTime: string;
   lastClosingPurgeDate?: string;
@@ -37,6 +39,14 @@ const settingsSchema = new Schema<ISettings>(
     logo: String,
     primaryColor: { type: String, default: "#ea580c" },
     accentColor: { type: String, default: "#f97316" },
+    privacyPolicy: {
+      en: { type: String, default: "" },
+      ar: { type: String, default: "" },
+    },
+    termsAndConditions: {
+      en: { type: String, default: "" },
+      ar: { type: String, default: "" },
+    },
     openTime: { type: String, default: "09:00" },
     closeTime: { type: String, default: "23:00" },
     lastClosingPurgeDate: String,

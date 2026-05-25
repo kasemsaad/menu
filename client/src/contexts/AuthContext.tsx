@@ -24,6 +24,14 @@ const AuthContext = createContext<{
     phone: string;
     address: string;
   }) => Promise<CustomerUser>;
+  updateCustomer: (data: {
+    name: string;
+    phone: string;
+    address: string;
+    deliveryLat?: number;
+    deliveryLng?: number;
+    password?: string;
+  }) => Promise<CustomerUser>;
   refreshUser: () => Promise<void>;
   logout: () => void;
   customerLogout: () => void;
@@ -41,6 +49,14 @@ const AuthContext = createContext<{
     role: "customer",
   }),
   customerRegister: async () => ({
+    id: "",
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    role: "customer",
+  }),
+  updateCustomer: async () => ({
     id: "",
     name: "",
     email: "",
@@ -126,6 +142,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return data.user as CustomerUser;
   };
 
+  const updateCustomer = async (payload: {
+    name: string;
+    phone: string;
+    address: string;
+    deliveryLat?: number;
+    deliveryLng?: number;
+    password?: string;
+  }) => {
+    const { data } = await api.patch("/auth/customer/me", payload);
+    setCustomer(data as CustomerUser);
+    return data as CustomerUser;
+  };
+
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("authKind");
@@ -146,6 +175,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         customerLogin,
         customerRegister,
+        updateCustomer,
         refreshUser,
         logout,
         customerLogout,

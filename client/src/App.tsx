@@ -19,6 +19,10 @@ import { GuestOffers } from "@/pages/guest/GuestOffers";
 import { GuestTableOrders } from "@/pages/guest/GuestTableOrders";
 import { CustomerSignup } from "@/pages/customer/CustomerSignup";
 import { CustomerLogin } from "@/pages/customer/CustomerLogin";
+import { CustomerProfile } from "@/pages/customer/CustomerProfile";
+import { CustomerOrders } from "@/pages/customer/CustomerOrders";
+import { PrivacyPolicy } from "@/pages/guest/PrivacyPolicy";
+import { TermsConditions } from "@/pages/guest/TermsConditions";
 import { ChefDashboard } from "@/pages/chef/ChefDashboard";
 import { WaiterDashboard } from "@/pages/waiter/WaiterDashboard";
 import { DeliveryDashboard } from "@/pages/delivery/DeliveryDashboard";
@@ -27,6 +31,8 @@ import { AdminCrud } from "@/pages/admin/AdminCrud";
 import { AdminSettings } from "@/pages/admin/AdminSettings";
 import { AdminReviews } from "@/pages/admin/AdminReviews";
 import { AdminBanners } from "@/pages/admin/AdminBanners";
+import { AdminCustomers } from "@/pages/admin/AdminCustomers";
+import { AdminDelivery } from "@/pages/admin/AdminDelivery";
 
 const App = () => (
   <ThemeProvider>
@@ -44,6 +50,8 @@ const App = () => (
             <Route path="cart" element={<GuestCart />} />
             <Route path="table-orders" element={<GuestTableOrders />} />
             <Route path="checkout" element={<GuestCheckout />} />
+            <Route path="privacy" element={<PrivacyPolicy />} />
+            <Route path="terms" element={<TermsConditions />} />
             <Route path="order/:orderId" element={<OrderStatus />} />
             <Route path="offers" element={<GuestOffers />} />
           </Route>
@@ -53,7 +61,11 @@ const App = () => (
             <Route path="product/:id" element={<ProductDetail />} />
             <Route path="cart" element={<GuestCart />} />
             <Route path="checkout" element={<DeliveryCheckout />} />
+            <Route path="privacy" element={<PrivacyPolicy />} />
+            <Route path="terms" element={<TermsConditions />} />
             <Route path="order/:orderId" element={<OrderStatus />} />
+            <Route path="orders" element={<CustomerOrders />} />
+            <Route path="profile" element={<CustomerProfile />} />
             <Route path="offers" element={<GuestOffers />} />
           </Route>
           <Route
@@ -99,6 +111,8 @@ const App = () => (
             <Route path="categories" element={<AdminCrud resource="categories" />} />
             <Route path="tables" element={<AdminCrud resource="tables" />} />
             <Route path="users" element={<AdminCrud resource="users" />} />
+            <Route path="customers" element={<AdminCustomers />} />
+            <Route path="delivery" element={<AdminDelivery />} />
             <Route path="coupons" element={<AdminCrud resource="coupons" />} />
             <Route path="offers" element={<AdminCrud resource="offers" />} />
             <Route path="banners" element={<AdminBanners />} />

@@ -54,16 +54,42 @@ export const DeliveryLayout = () => {
           </section>
         </header>
         <section className="mx-auto max-w-lg px-4 py-4">
+          <div className="mb-4 flex flex-wrap gap-3 text-xs text-stone-500">
+            <Link to={`${basePath}/privacy`} className="underline hover:text-brand-600">
+              {t("privacyPolicyLink")}
+            </Link>
+            <Link to={`${basePath}/terms`} className="underline hover:text-brand-600">
+              {t("termsConditionsLink")}
+            </Link>
+          </div>
           {customer && (
-            <AccountSummary
-              title={t("accountDetails")}
-              rows={[
-                { label: t("customerName"), value: customer.name },
-                { label: t("email"), value: customer.email },
-                { label: t("phone"), value: customer.phone },
-                { label: t("address"), value: customer.address },
-              ]}
-            />
+            <>
+              <AccountSummary
+                title={t("accountDetails")}
+                rows={[
+                  { label: t("customerName"), value: customer.name },
+                  { label: t("email"), value: customer.email },
+                  { label: t("phone"), value: customer.phone },
+                  { label: t("address"), value: customer.address },
+                ]}
+              />
+              <section className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="btn-outline"
+                  onClick={() => navigate(`${basePath}/profile`)}
+                >
+                  {t("editProfile")}
+                </button>
+                <button
+                  type="button"
+                  className="btn-outline"
+                  onClick={() => navigate(`${basePath}/orders`)}
+                >
+                  {t("myOrders")}
+                </button>
+              </section>
+            </>
           )}
           <Outlet context={{ basePath, orderMode: "delivery" as const }} />
         </section>

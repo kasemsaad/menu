@@ -19,6 +19,7 @@ import settingsRoutes from "./routes/settings.js";
 import bannersRoutes from "./routes/banners.js";
 import reviewRoutes from "./routes/reviews.js";
 import paymentRoutes from "./routes/payment.js";
+import customerRoutes from "./routes/customers.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -44,6 +45,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/banners", bannersRoutes);
+app.use("/api/customers", customerRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/payment", paymentRoutes);
 

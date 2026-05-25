@@ -6,6 +6,7 @@ import {
   Grid3X3,
   Table2,
   Users,
+  User,
   Ticket,
   BarChart3,
   Star,
@@ -15,6 +16,7 @@ import {
   Truck,
   ConciergeBell,
   Tag,
+  ImagePlus,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -27,8 +29,11 @@ const adminLinks = [
   { to: "/admin/categories", icon: Grid3X3, label: "categories" },
   { to: "/admin/tables", icon: Table2, label: "tables" },
   { to: "/admin/users", icon: Users, label: "users" },
+  { to: "/admin/customers", icon: User, label: "customers" },
+  { to: "/admin/delivery", icon: Truck, label: "delivery" },
   { to: "/admin/coupons", icon: Ticket, label: "coupons" },
   { to: "/admin/offers", icon: Tag, label: "offers" },
+  { to: "/admin/banners", icon: ImagePlus, label: "banners" },
   { to: "/admin/reviews", icon: Star, label: "reviews" },
   { to: "/admin/analytics", icon: BarChart3, label: "analytics" },
   { to: "/admin/settings", icon: Settings, label: "settings" },

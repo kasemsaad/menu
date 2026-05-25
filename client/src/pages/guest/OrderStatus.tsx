@@ -6,6 +6,7 @@ import api from "@/lib/api";
 import { joinOrder, getSocket } from "@/lib/socket";
 import { playNotificationSound } from "@/lib/sounds";
 import { TableCheckModal } from "@/components/TableCheckModal";
+import { MapView } from "@/components/MapView";
 import type { AppSettings, Order, OrderStatus as OrderStatusType, TableCheck } from "@/types";
 import { formatPrice } from "@/lib/utils";
 
@@ -111,6 +112,10 @@ export const OrderStatus = () => {
 
   const locale = i18n.resolvedLanguage?.startsWith("ar") ? "ar" : "en";
   const isDelivery = order.type === "delivery";
+  const createdAt = new Date(order.createdAt);
+  const minutesAgo = Math.max(0, Math.floor((Date.now() - createdAt.getTime()) / 60000));
+  const orderAgeLabel = minutesAgo === 0 ? t("justNow") : t("orderAgeMinutes", { minutes: minutesAgo });
+  const driver = order.type === "delivery" && typeof order.driverId === "object" ? order.driverId : null;
   const servicePercent = settings?.servicePercent ?? 0;
   const serviceCharge = !isDelivery && servicePercent > 0
     ? Math.round(((order.subtotal - order.discount + order.tax) * servicePercent) / 100)
@@ -134,6 +139,13 @@ export const OrderStatus = () => {
         {isDelivery && order.deliveryAddress && (
           <p className="mt-2 text-xs text-stone-500">{order.deliveryAddress}</p>
         )}
+        {isDelivery && driver?.name && (
+          <p className="mt-2 text-sm text-stone-500">
+            {t("driver")}: {driver.name}
+            {driver.phone ? ` · ${driver.phone}` : ""}
+          </p>
+        )}
+        <p className="mt-2 text-sm text-stone-500">{orderAgeLabel}</p>
       </section>
       <section className="flex justify-between px-1">
         {steps.map((s, i) => (
@@ -149,6 +161,18 @@ export const OrderStatus = () => {
           </section>
         ))}
       </section>
+
+      {isDelivery && order.deliveryLat && order.deliveryLng && (
+        <section className="card rounded-3xl bg-stone-50 p-4 shadow-sm dark:bg-stone-900">
+          <h3 className="mb-3 font-semibold">{t("deliveryMap")}</h3>
+          <MapView
+            lat={order.deliveryLat}
+            lng={order.deliveryLng}
+            label={order.deliveryAddress}
+            height="280px"
+          />
+        </section>
+      )}
 
       <section className="space-y-4 rounded-3xl bg-stone-50 p-4 text-sm shadow-sm dark:bg-stone-900">
         <h3 className="text-base font-semibold">{t("products")}</h3>

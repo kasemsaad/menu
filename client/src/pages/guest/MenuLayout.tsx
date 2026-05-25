@@ -1,4 +1,4 @@
-import { Outlet, useParams } from "react-router-dom";
+import { Link, Outlet, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import { joinTable } from "@/lib/socket";
@@ -53,6 +53,14 @@ export const MenuLayout = () => {
           </section>
         </header>
         <section className="mx-auto max-w-lg px-4 py-4">
+          <div className="mb-4 flex flex-wrap gap-3 text-xs text-stone-500">
+            <Link to={`${basePath}/privacy`} className="underline hover:text-brand-600">
+              {t("privacyPolicyLink")}
+            </Link>
+            <Link to={`${basePath}/terms`} className="underline hover:text-brand-600">
+              {t("termsConditionsLink")}
+            </Link>
+          </div>
           <Outlet context={{ table, basePath }} />
         </section>
         <GuestBottomNav basePath={basePath} tableId={table?._id} />

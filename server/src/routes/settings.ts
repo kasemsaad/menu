@@ -23,6 +23,8 @@ router.patch("/", auth, requireRole("admin"), async (req, res) => {
     logo,
     primaryColor,
     accentColor,
+    privacyPolicy,
+    termsAndConditions,
     openTime,
     closeTime,
     notificationSounds,
@@ -40,6 +42,8 @@ router.patch("/", auth, requireRole("admin"), async (req, res) => {
   if (logo !== undefined) settings.logo = logo;
   if (primaryColor !== undefined) settings.primaryColor = primaryColor;
   if (accentColor !== undefined) settings.accentColor = accentColor;
+  if (privacyPolicy !== undefined) settings.privacyPolicy = privacyPolicy;
+  if (termsAndConditions !== undefined) settings.termsAndConditions = termsAndConditions;
   if (openTime !== undefined) settings.openTime = openTime;
   if (closeTime !== undefined) settings.closeTime = closeTime;
   if (notificationSounds !== undefined) settings.notificationSounds = notificationSounds;

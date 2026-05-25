@@ -69,6 +69,7 @@ export interface Order {
   deliveryAddress?: string;
   deliveryLat?: number;
   deliveryLng?: number;
+  driverId?: string | { id?: string; name?: string; phone?: string };
   items: CartItem[];
   status: OrderStatus;
   subtotal: number;
@@ -197,6 +198,8 @@ export interface AppSettings {
   logo?: string;
   primaryColor: string;
   accentColor: string;
+  privacyPolicy?: Localized;
+  termsAndConditions?: Localized;
   openTime?: string;
   closeTime?: string;
   notificationSounds?: NotificationSounds;

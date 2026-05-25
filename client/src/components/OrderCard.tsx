@@ -25,6 +25,10 @@ export const OrderCard = ({ order, actions, showItems = true }: Props) => {
   const { t } = useTranslation();
   const tableNum = getOrderTableNumber(order);
   const [productIdToShow, setProductIdToShow] = useState<string | undefined>(undefined);
+  const createdAt = new Date(order.createdAt);
+  const minutesAgo = Math.max(0, Math.floor((Date.now() - createdAt.getTime()) / 60000));
+  const orderAge = minutesAgo === 0 ? t("justNow") : t("orderAgeMinutes", { minutes: minutesAgo });
+  const driver = order.type === "delivery" && typeof order.driverId === "object" ? order.driverId : undefined;
 
   return (
     <article className="card space-y-3">
@@ -43,10 +47,16 @@ export const OrderCard = ({ order, actions, showItems = true }: Props) => {
               </span>
             )}
           </div>
-          <p className="mt-1 flex items-center gap-2 text-sm text-stone-500">
+          <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-stone-500">
             <Clock size={14} />
-            {new Date(order.createdAt).toLocaleTimeString()}
+            {new Date(order.createdAt).toLocaleTimeString()} · {orderAge}
           </p>
+          {order.type === "delivery" && driver?.name && (
+            <p className="text-xs text-stone-500">
+              {t("driver")}: {driver.name}
+              {driver.phone ? ` · ${driver.phone}` : ""}
+            </p>
+          )}
           {order.type === "delivery" && order.customerName && (
             <p className="text-xs text-stone-500">
               {order.customerName}

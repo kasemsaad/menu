@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useState, useRef, useMemo, type ChangeEvent } from "react";
 import { Formik, Form, Field } from "formik";
 import { useTranslation } from "react-i18next";
 import { ImagePlus } from "lucide-react";
@@ -27,6 +27,10 @@ type FormValues = {
   soundUrgent: string;
   soundSuccess: string;
   soundUpdate: string;
+  privacyEn: string;
+  privacyAr: string;
+  termsEn: string;
+  termsAr: string;
   soundVolume: number;
 };
 
@@ -46,6 +50,10 @@ const toForm = (s: AppSettings): FormValues => ({
   soundUrgent: s.notificationSounds?.urgent ?? "",
   soundSuccess: s.notificationSounds?.success ?? "",
   soundUpdate: s.notificationSounds?.update ?? "",
+  privacyEn: s.privacyPolicy?.en ?? "",
+  privacyAr: s.privacyPolicy?.ar ?? "",
+  termsEn: s.termsAndConditions?.en ?? "",
+  termsAr: s.termsAndConditions?.ar ?? "",
   soundVolume: s.soundVolume ?? 0.85,
 });
 
@@ -93,6 +101,8 @@ export const AdminSettings = () => {
   const { settings, refresh } = useSettings();
   const { showToast, showError } = useToast();
   const [saved, setSaved] = useState(false);
+  const DRAFT_KEY = "admin_settings_draft_v1";
+  const latestValuesRef = useRef<FormValues | null>(null);
 
   useEffect(() => {
     if (!saved) return;
@@ -100,14 +110,28 @@ export const AdminSettings = () => {
     return () => clearTimeout(timer);
   }, [saved]);
 
-  if (!settings) return null;
+  const initialValues = useMemo(() => {
+    if (!settings) return undefined;
+    const base = toForm(settings);
+    try {
+      const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null");
+      if (draft && typeof draft === "object") {
+        return { ...base, ...draft } as FormValues;
+      }
+    } catch (e) {
+      // ignore parse errors
+    }
+    return base as FormValues;
+  }, [settings]);
+
+  if (!settings || !initialValues) return null;
 
   return (
     <section className="max-w-2xl space-y-6">
       <h1 className="font-display text-2xl font-bold">{t("settings")}</h1>
 
       <Formik
-        initialValues={toForm(settings)}
+        initialValues={initialValues}
         enableReinitialize
         onSubmit={async (v) => {
           const primary = normalizeHex(v.primaryColor);
@@ -122,6 +146,8 @@ export const AdminSettings = () => {
               logo: v.logo || undefined,
               primaryColor: primary,
               accentColor: accent,
+              privacyPolicy: { en: v.privacyEn, ar: v.privacyAr },
+              termsAndConditions: { en: v.termsEn, ar: v.termsAr },
               openTime: v.openTime,
               closeTime: v.closeTime,
               notificationSounds: {
@@ -134,6 +160,10 @@ export const AdminSettings = () => {
             });
             applyBrandTheme(primary, accent);
             await refresh();
+            // clear saved draft after successful persist
+            try {
+              localStorage.removeItem(DRAFT_KEY);
+            } catch {}
             setSaved(true);
             showToast(t("saved"), "success");
           } catch (err) {
@@ -142,6 +172,37 @@ export const AdminSettings = () => {
         }}
       >
         {({ values, setFieldValue }) => {
+          // keep latest values in ref for autosave and unload checks
+          latestValuesRef.current = values;
+
+          useEffect(() => {
+            // autosave draft every 2s
+            const id = setInterval(() => {
+              try {
+                if (latestValuesRef.current) {
+                  localStorage.setItem(DRAFT_KEY, JSON.stringify(latestValuesRef.current));
+                }
+              } catch {}
+            }, 2000);
+            return () => clearInterval(id);
+          }, []);
+
+          useEffect(() => {
+            // warn before unload if there are unsaved changes
+            const handler = (e: BeforeUnloadEvent) => {
+              try {
+                const initial = initialValues;
+                const current = latestValuesRef.current;
+                if (!initial || !current) return;
+                if (JSON.stringify(initial) !== JSON.stringify(current)) {
+                  e.preventDefault();
+                  e.returnValue = "";
+                }
+              } catch {}
+            };
+            window.addEventListener("beforeunload", handler);
+            return () => window.removeEventListener("beforeunload", handler);
+          }, []);
           const applyPreview = (primary: string, accent: string) => {
             applyBrandTheme(primary, accent);
             configureNotificationSounds(
@@ -343,6 +404,30 @@ export const AdminSettings = () => {
                   </label>
                 </div>
                 <p className="text-xs text-stone-500">{t("closeTimeHint")}</p>
+              </section>
+
+              <section className="card space-y-4">
+                <h2 className="font-semibold">{t("privacyPolicy")}</h2>
+                <label className="space-y-1 text-sm">
+                  <span className="font-medium">{t("english")}</span>
+                  <Field as="textarea" name="privacyEn" className="input-field min-h-[8rem]" />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="font-medium">{t("arabic")}</span>
+                  <Field as="textarea" name="privacyAr" className="input-field min-h-[8rem]" />
+                </label>
+              </section>
+
+              <section className="card space-y-4">
+                <h2 className="font-semibold">{t("termsConditions")}</h2>
+                <label className="space-y-1 text-sm">
+                  <span className="font-medium">{t("english")}</span>
+                  <Field as="textarea" name="termsEn" className="input-field min-h-[8rem]" />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="font-medium">{t("arabic")}</span>
+                  <Field as="textarea" name="termsAr" className="input-field min-h-[8rem]" />
+                </label>
               </section>
 
               <div className="flex items-center gap-3">
