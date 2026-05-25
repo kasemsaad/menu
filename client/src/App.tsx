@@ -26,6 +26,7 @@ import { AdminDashboard } from "@/pages/admin/AdminDashboard";
 import { AdminCrud } from "@/pages/admin/AdminCrud";
 import { AdminSettings } from "@/pages/admin/AdminSettings";
 import { AdminReviews } from "@/pages/admin/AdminReviews";
+import { AdminBanners } from "@/pages/admin/AdminBanners";
 
 const App = () => (
   <ThemeProvider>
@@ -99,6 +100,8 @@ const App = () => (
             <Route path="tables" element={<AdminCrud resource="tables" />} />
             <Route path="users" element={<AdminCrud resource="users" />} />
             <Route path="coupons" element={<AdminCrud resource="coupons" />} />
+            <Route path="offers" element={<AdminCrud resource="offers" />} />
+            <Route path="banners" element={<AdminBanners />} />
             <Route path="reviews" element={<AdminReviews />} />
             <Route path="analytics" element={<AdminDashboard />} />
             <Route path="settings" element={<AdminSettings />} />

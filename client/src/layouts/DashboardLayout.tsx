@@ -14,6 +14,7 @@ import {
   ChefHat,
   Truck,
   ConciergeBell,
+  Tag,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -27,6 +28,7 @@ const adminLinks = [
   { to: "/admin/tables", icon: Table2, label: "tables" },
   { to: "/admin/users", icon: Users, label: "users" },
   { to: "/admin/coupons", icon: Ticket, label: "coupons" },
+  { to: "/admin/offers", icon: Tag, label: "offers" },
   { to: "/admin/reviews", icon: Star, label: "reviews" },
   { to: "/admin/analytics", icon: BarChart3, label: "analytics" },
   { to: "/admin/settings", icon: Settings, label: "settings" },

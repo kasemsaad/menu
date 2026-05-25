@@ -132,8 +132,27 @@ export interface Offer {
   _id: string;
   title: Localized;
   description?: Localized;
+  image?: string;
   discountPercent: number;
-  productIds: Product[];
+  productIds: Array<Product | string>;
+  startsAt: string;
+  endsAt: string;
+  isActive: boolean;
+}
+
+export interface Banner {
+  _id: string;
+  title: Localized;
+  subtitle?: Localized;
+  description?: Localized;
+  image?: string;
+  buttonText?: Localized;
+  buttonLink?: string;
+  isFeatured?: boolean;
+  isActive?: boolean;
+  order?: number;
+  startsAt?: string;
+  endsAt?: string;
 }
 
 export interface NotificationSounds {

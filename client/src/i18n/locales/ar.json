@@ -63,6 +63,9 @@
   "orderCount": "الطلبات",
   "topProducts": "الأكثر مبيعاً",
   "peakHours": "ساعات الذروة",
+  "recentOrders": "أحدث الطلبات",
+  "activeOffers": "العروض النشطة",
+  "recentProducts": "أحدث المنتجات",
   "generateQr": "إنشاء QR",
   "save": "حفظ",
   "cancel": "إلغاء",
@@ -78,6 +81,8 @@
   "maxUses": "الحد الأقصى للاستخدام",
   "expiresAt": "تاريخ الانتهاء",
   "active": "نشط",
+  "selectedProducts": "المنتجات المختارة",
+  "selectProductsHint": "اختر منتجًا واحدًا أو أكثر لهذا العرض.",
   "noOrders": "لا توجد طلبات",
   "tableOrders": "طلباتي",
   "tableOrdersHint": "الطلبات من هذه الطاولة",
@@ -153,6 +158,8 @@
   "grandTotal": "الإجمالي النهائي",
   "tableCheck": "الحساب",
   "noTableOrders": "لا توجد طلبات نشطة على هذه الطاولة",
+  "noOrder": "الطلب غير موجود",
+  "orderNotFound": "الطلب غير موجود",
   "taxPercent": "الضريبة (%)",
   "loading": "جاري التحميل"
 }

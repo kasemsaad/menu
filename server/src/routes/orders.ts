@@ -105,7 +105,6 @@ router.post("/", optionalCustomerAuth, async (req: CustomerAuthRequest, res) => 
   const populated = await Order.findById(order.id).populate("tableId", "number");
   const serialized = serializeOrder(populated);
   await emitNewOrderToStaff(serialized);
-  emitNotification("admin", { type: "new_order", order: serialized });
   res.status(201).json(serialized);
 });
 
@@ -236,4 +235,42 @@ router.post("/:id/request-bill", async (req, res) => {
   res.json({ message: "Bill requested", tableCheck: check });
 });
 
+router.delete("/:id", auth, requireRole("admin"), async (req, res) => {
+  const order = await Order.findByIdAndUpdate(
+    req.params.id,
+    { deletedAt: new Date(), status: "cancelled" },
+    { new: true }
+  );
+  if (!order) return res.status(404).json({ message: "Not found" });
+  const serialized = serializeOrder(order);
+  await emitOrderUpdatedToStaff(serialized);
+  emitNotification("admin", { type: "order_cancelled", order: serialized });
+  res.json({ message: "Order cancelled", order: serialized });
+});
+
+router.post("/:id/notify", auth, requireRole("admin"), async (req, res) => {
+  const { role, message } = req.body;
+  const order = await Order.findById(req.params.id);
+  if (!order) return res.status(404).json({ message: "Order not found" });
+  
+  const notification = {
+    type: "admin_broadcast",
+    message,
+    order: serializeOrder(order),
+    timestamp: new Date(),
+  };
+  
+  if (role === "chef") {
+    emitNotification("chef", notification);
+  } else if (role === "waiter") {
+    await emitWaiterTableNotification(tableIdFromOrder(order), notification);
+  } else if (role === "delivery") {
+    emitNotification("delivery", notification);
+  }
+  
+  emitNotification("admin", notification);
+  res.json({ message: "Notification sent" });
+});
+
 export default router;
+

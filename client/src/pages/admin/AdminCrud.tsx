@@ -2,11 +2,11 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Formik, Form, Field, FieldArray } from "formik";
 import api from "@/lib/api";
-import type { AdminUser, Category, Coupon, Product, TableInfo, UserRole } from "@/types";
-import { QrCode, Plus, Trash2, Pencil, ImagePlus, Users, Ticket, Receipt } from "lucide-react";
+import type { AdminUser, Category, Coupon, Offer, Product, TableInfo, UserRole } from "@/types";
+import { QrCode, Plus, Trash2, Pencil, ImagePlus, Users, Ticket, Receipt, Tag } from "lucide-react";
 import { TableCheckModal } from "@/components/TableCheckModal";
 
-type Resource = "categories" | "products" | "tables" | "users" | "coupons";
+type Resource = "categories" | "products" | "tables" | "users" | "coupons" | "offers";
 
 const endpoints: Record<Resource, string> = {
   categories: "/categories/all",
@@ -14,6 +14,7 @@ const endpoints: Record<Resource, string> = {
   tables: "/tables",
   users: "/users",
   coupons: "/coupons",
+  offers: "/offers/all",
 };
 
 type CategoryForm = {
@@ -93,7 +94,32 @@ type CouponForm = {
   isActive: boolean;
 };
 
+type OfferForm = {
+  titleEn: string;
+  titleAr: string;
+  descriptionEn: string;
+  descriptionAr: string;
+  image: string;
+  discountPercent: number;
+  productIds: string[];
+  startsAt: string;
+  endsAt: string;
+  isActive: boolean;
+};
+
 const emptyTable: TableForm = { number: 1, capacity: 4, status: "available" };
+const emptyOffer: OfferForm = {
+  titleEn: "",
+  titleAr: "",
+  descriptionEn: "",
+  descriptionAr: "",
+  image: "",
+  discountPercent: 10,
+  productIds: [],
+  startsAt: new Date().toISOString().slice(0, 10),
+  endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+  isActive: true,
+};
 
 const emptyUser: UserForm = {
   name: "",
@@ -149,6 +175,19 @@ const couponToForm = (c: Coupon): CouponForm => ({
   isActive: c.isActive,
 });
 
+const offerToForm = (o: Offer): OfferForm => ({
+  titleEn: o.title.en,
+  titleAr: o.title.ar,
+  descriptionEn: o.description?.en ?? "",
+  descriptionAr: o.description?.ar ?? "",
+  image: o.image ?? "",
+  discountPercent: o.discountPercent,
+  productIds: (o.productIds ?? []).map((id) => (typeof id === "string" ? id : id._id)),
+  startsAt: o.startsAt ? o.startsAt.slice(0, 10) : new Date().toISOString().slice(0, 10),
+  endsAt: o.endsAt ? o.endsAt.slice(0, 10) : new Date().toISOString().slice(0, 10),
+  isActive: o.isActive,
+});
+
 const buildTablePayload = (v: TableForm) => ({
   number: Number(v.number),
   capacity: Number(v.capacity),
@@ -174,6 +213,20 @@ const buildCouponPayload = (v: CouponForm) => ({
   minOrder: Number(v.minOrder),
   maxUses: Number(v.maxUses),
   expiresAt: v.expiresAt ? new Date(v.expiresAt).toISOString() : undefined,
+  isActive: v.isActive,
+});
+
+const buildOfferPayload = (v: OfferForm) => ({
+  title: { en: v.titleEn, ar: v.titleAr },
+  description:
+    v.descriptionEn || v.descriptionAr
+      ? { en: v.descriptionEn, ar: v.descriptionAr }
+      : undefined,
+  image: v.image || undefined,
+  discountPercent: Number(v.discountPercent),
+  productIds: v.productIds.filter(Boolean),
+  startsAt: new Date(v.startsAt).toISOString(),
+  endsAt: new Date(v.endsAt).toISOString(),
   isActive: v.isActive,
 });
 
@@ -457,6 +510,72 @@ const UserFormFields = ({ isEdit }: { isEdit?: boolean }) => (
   </>
 );
 
+const OfferFormFields = ({
+  values,
+  setFieldValue,
+  products,
+}: {
+  values: OfferForm;
+  setFieldValue: (field: string, value: unknown) => void;
+  products: Product[];
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <Field name="titleEn" placeholder="Title EN" className="input-field" />
+      <Field name="titleAr" placeholder="Title AR" className="input-field" />
+      <Field name="descriptionEn" placeholder="Description EN" className="input-field" />
+      <Field name="descriptionAr" placeholder="Description AR" className="input-field" />
+      <Field name="discountPercent" type="number" className="input-field" placeholder="Discount %" />
+      <ImageField value={values.image} onChange={(url) => setFieldValue("image", url)} />
+      <label className="space-y-2 text-sm sm:col-span-2">
+        <span className="font-medium">{t("products")}</span>
+        <select
+          name="productIds"
+          multiple
+          aria-label={t("products")}
+          className="input-field h-40 rounded-xl"
+          value={values.productIds}
+          onChange={(event) => {
+            const selectedValues = Array.from(event.target.selectedOptions).map((option) => option.value);
+            setFieldValue("productIds", selectedValues);
+          }}
+        >
+          {products.map((product) => (
+            <option key={product._id} value={product._id}>
+              {product.name.en} / {product.name.ar}
+            </option>
+          ))}
+        </select>
+        {values.productIds.length > 0 ? (
+          <div className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-xs text-stone-600 dark:border-stone-700 dark:bg-stone-900">
+            <p className="font-semibold text-stone-700 dark:text-stone-200">{t("selectedProducts")}</p>
+            <ul className="mt-2 space-y-1">
+              {values.productIds.map((id) => {
+                const product = products.find((product) => product._id === id);
+                return (
+                  <li key={id} className="truncate">
+                    {product ? `${product.name.en} / ${product.name.ar}` : id}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ) : (
+          <p className="text-xs text-stone-500">{t("selectProductsHint")}</p>
+        )}
+      </label>
+      <Field name="startsAt" type="date" className="input-field" />
+      <Field name="endsAt" type="date" className="input-field" />
+      <label className="flex items-center gap-2 text-sm">
+        <Field type="checkbox" name="isActive" />
+        {t("active")}
+      </label>
+    </>
+  );
+};
+
 const CouponFormFields = () => {
   const { t } = useTranslation();
 
@@ -524,6 +643,7 @@ export const AdminCrud = ({ resource }: { resource: Resource }) => {
   const [qrPreview, setQrPreview] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [checkTableId, setCheckTableId] = useState<string | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
 
   const load = () => api.get(endpoints[resource]).then((r) => setItems(r.data));
 
@@ -536,6 +656,9 @@ export const AdminCrud = ({ resource }: { resource: Resource }) => {
   useEffect(() => {
     if (resource === "products") {
       api.get("/categories/all").then((r) => setCategories(r.data));
+    }
+    if (resource === "offers") {
+      api.get("/products/all").then((r) => setProducts(r.data));
     }
   }, [resource]);
 
@@ -834,6 +957,82 @@ export const AdminCrud = ({ resource }: { resource: Resource }) => {
     </article>
   );
 
+  const renderOfferItem = (item: Offer) => {
+    const titleLabel = item.title?.en || item.title?.ar || t("offer");
+    const subtitleLabel = item.title?.ar
+      ? `${item.title?.en || item.title?.ar} / ${item.title.ar}`
+      : titleLabel;
+
+    return (
+      <article key={item._id} className="card space-y-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          {item.image ? (
+            <img
+              src={item.image}
+              alt={titleLabel}
+              className="h-28 w-full rounded-2xl object-cover lg:h-20 lg:w-20"
+            />
+          ) : (
+            <div className="flex h-28 w-full items-center justify-center rounded-2xl bg-brand-100 text-brand-700 dark:bg-brand-900/40 lg:h-20 lg:w-20">
+              <Tag size={24} />
+            </div>
+          )}
+          <div className="min-w-0 flex-1 space-y-1 text-sm">
+            <p className="font-semibold">{subtitleLabel}</p>
+            {item.description?.en && (
+              <p className="text-stone-500 text-sm">{item.description.en}</p>
+            )}
+            {item.description?.ar && (
+              <p className="text-stone-500 text-sm">{item.description.ar}</p>
+            )}
+            <p className="text-stone-500">
+              -{item.discountPercent}% · {item.productIds?.length ?? 0} products
+            </p>
+            <p className="text-xs text-stone-400">
+              {new Date(item.startsAt).toLocaleDateString()} — {new Date(item.endsAt).toLocaleDateString()}
+            </p>
+            <span
+              className={`inline-block rounded-full px-2 py-0.5 text-xs ${item.isActive ? "bg-green-100 text-green-700" : "bg-stone-200 text-stone-600"}`}
+            >
+              {item.isActive ? "Active" : "Inactive"}
+            </span>
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              className="btn-outline p-2"
+              onClick={() => setEditingId(editingId === item._id ? null : item._id)}
+            >
+              <Pencil size={18} />
+            </button>
+            <button type="button" className="text-red-500" onClick={() => remove(item._id)}>
+              <Trash2 size={18} />
+            </button>
+          </div>
+        </div>
+        {editingId === item._id && (
+          <Formik
+            initialValues={offerToForm(item)}
+            enableReinitialize
+            onSubmit={async (v, { setSubmitting }) => {
+              await api.patch(`/offers/${item._id}`, buildOfferPayload(v));
+              setEditingId(null);
+              setSubmitting(false);
+              load();
+            }}
+          >
+            {({ values, setFieldValue, isSubmitting }) => (
+              <Form className="grid gap-3 border-t border-stone-200 pt-3 sm:grid-cols-2 dark:border-stone-700">
+                <OfferFormFields values={values} setFieldValue={setFieldValue} products={products} />
+                <EditFormActions onCancel={() => setEditingId(null)} isSubmitting={isSubmitting} />
+              </Form>
+            )}
+          </Formik>
+        )}
+      </article>
+    );
+  };
+
   const renderCouponItem = (item: Coupon) => (
     <article key={item._id} className="card space-y-3">
       <div className="flex items-center gap-4">
@@ -922,9 +1121,31 @@ export const AdminCrud = ({ resource }: { resource: Resource }) => {
           (items as unknown as TableInfo[]).map((item) => renderTableItem(item))}
         {resource === "users" &&
           (items as unknown as AdminUser[]).map((item) => renderUserItem(item))}
+        {resource === "offers" &&
+          (items as unknown as Offer[]).filter(Boolean).map((item) => renderOfferItem(item))}
         {resource === "coupons" &&
           (items as unknown as Coupon[]).map((item) => renderCouponItem(item))}
       </section>
+      {resource === "offers" && (
+        <Formik
+          initialValues={emptyOffer}
+          onSubmit={async (v, { resetForm }) => {
+            await api.post("/offers", buildOfferPayload(v));
+            resetForm();
+            load();
+          }}
+        >
+          {({ values, setFieldValue }) => (
+            <Form className="card grid gap-3 sm:grid-cols-2">
+              <p className="font-semibold sm:col-span-2">{t("add")} {t("offers")}</p>
+              <OfferFormFields values={values} setFieldValue={setFieldValue} products={products} />
+              <button type="submit" className="btn-primary sm:col-span-2">
+                {t("add")}
+              </button>
+            </Form>
+          )}
+        </Formik>
+      )}
       {resource === "categories" && (
         <Formik
           initialValues={emptyCategory}

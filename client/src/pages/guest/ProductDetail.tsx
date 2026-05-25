@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Minus, Plus, Star } from "lucide-react";
 import api from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
-import type { Product, Addon } from "@/types";
+import type { Product, Addon, Offer } from "@/types";
 import { t as loc, formatPrice } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 
@@ -16,12 +16,14 @@ export const ProductDetail = () => {
   const { addItem } = useCart();
   const { showToast } = useToast();
   const [product, setProduct] = useState<Product | null>(null);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [qty, setQty] = useState(1);
   const [selectedAddons, setSelectedAddons] = useState<Addon[]>([]);
   const [rating, setRating] = useState(5);
 
   useEffect(() => {
     api.get(`/products/${id}`).then((r) => setProduct(r.data));
+    api.get("/offers").then((r) => setOffers(r.data));
   }, [id]);
 
   if (!product) return null;
@@ -48,8 +50,17 @@ export const ProductDetail = () => {
       )
     : product.addons;
 
+  const activeOffers = product
+    ? offers.filter((offer) =>
+        offer.productIds.some((id) =>
+          typeof id === "string" ? id === product._id : id._id === product._id
+        )
+      )
+    : [];
+  const offerDiscount = activeOffers.length > 0 ? activeOffers[0].discountPercent : 0;
+  const discountedPrice = Math.round(product?.price ? product.price * (1 - offerDiscount / 100) : 0);
   const addonTotal = selectedAddons.reduce((s, a) => s + a.price, 0);
-  const lineTotal = (product.price + addonTotal) * qty;
+  const lineTotal = ((offerDiscount ? discountedPrice : product.price) + addonTotal) * qty;
 
   const submitRating = async () => {
     try {
@@ -77,7 +88,21 @@ export const ProductDetail = () => {
         {product.description && (
           <p className="mt-2 text-stone-500">{loc(product.description, lang)}</p>
         )}
-        <p className="mt-2 text-2xl font-bold text-brand-600">{formatPrice(product.price)}</p>
+        <div className="mt-2 flex items-center gap-3">
+          {offerDiscount ? (
+            <>
+              <span className="text-sm text-stone-400 line-through">
+                {formatPrice(product.price)}
+              </span>
+              <span className="text-2xl font-bold text-brand-600">{formatPrice(discountedPrice)}</span>
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                -{offerDiscount}%
+              </span>
+            </>
+          ) : (
+            <span className="text-2xl font-bold text-brand-600">{formatPrice(product.price)}</span>
+          )}
+        </div>
         {product.ratingCount > 0 && (
           <p className="mt-1 flex items-center gap-1 text-amber-500">
             <Star size={16} fill="currentColor" /> {product.rating} ({product.ratingCount})
@@ -133,7 +158,7 @@ export const ProductDetail = () => {
           addItem({
             productId: product._id,
             name: product.name,
-            price: product.price,
+            price: offerDiscount ? discountedPrice : product.price,
             quantity: qty,
             notes,
             addons: selectedAddons,

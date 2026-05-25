@@ -1,17 +1,21 @@
 import { Link } from "react-router-dom";
 import { Star, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { Product } from "@/types";
+import type { Offer, Product } from "@/types";
 import { t as loc, formatPrice } from "@/lib/utils";
 
 interface Props {
   product: Product;
   basePath: string;
+  offer?: Offer;
 }
 
-export const ProductCard = ({ product, basePath }: Props) => {
+export const ProductCard = ({ product, basePath, offer }: Props) => {
   const { i18n } = useTranslation();
   const lang = i18n.language;
+  const discountedPrice = offer
+    ? Math.round(product.price * (1 - offer.discountPercent / 100))
+    : product.price;
 
   return (
     <Link
@@ -28,16 +32,34 @@ export const ProductCard = ({ product, basePath }: Props) => {
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <h3 className="font-semibold text-stone-900 group-hover:text-brand dark:text-white">
-          {loc(product.name, lang)}
-        </h3>
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="font-semibold text-stone-900 group-hover:text-brand dark:text-white">
+            {loc(product.name, lang)}
+          </h3>
+          {offer && (
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+              -{offer.discountPercent}%
+            </span>
+          )}
+        </div>
         {product.description && (
           <p className="mt-0.5 line-clamp-2 text-xs text-stone-500">
             {loc(product.description, lang)}
           </p>
         )}
         <div className="mt-2 flex items-center justify-between">
-          <span className="font-bold text-brand-600">{formatPrice(product.price)}</span>
+          <div className="flex items-center gap-2">
+            {offer ? (
+              <>
+                <span className="text-sm text-stone-400 line-through">
+                  {formatPrice(product.price)}
+                </span>
+                <span className="font-bold text-brand-600">{formatPrice(discountedPrice)}</span>
+              </>
+            ) : (
+              <span className="font-bold text-brand-600">{formatPrice(product.price)}</span>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             {product.ratingCount > 0 && (
               <span className="flex items-center gap-0.5 text-xs text-amber-500">

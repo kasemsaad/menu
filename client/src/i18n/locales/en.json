@@ -1,5 +1,5 @@
 {
-  "appName": "Brew & Bite",
+  "appName": "Brew & ",
   "home": "Home",
   "menu": "Menu",
   "cart": "Cart",
@@ -63,6 +63,9 @@
   "orderCount": "Orders",
   "topProducts": "Top products",
   "peakHours": "Peak hours",
+  "recentOrders": "Recent orders",
+  "activeOffers": "Active offers",
+  "recentProducts": "Recent products",
   "generateQr": "Generate QR",
   "save": "Save",
   "cancel": "Cancel",
@@ -78,6 +81,8 @@
   "maxUses": "Max uses",
   "expiresAt": "Expiration date",
   "active": "Active",
+  "selectedProducts": "Selected products",
+  "selectProductsHint": "Choose one or more products for this offer.",
   "noOrders": "No orders yet",
   "tableOrders": "My orders",
   "tableOrdersHint": "Orders placed from this table",
@@ -153,6 +158,8 @@
   "grandTotal": "Grand total",
   "tableCheck": "Check",
   "noTableOrders": "No active orders on this table",
+  "noOrder": "Order not found",
+  "orderNotFound": "Order not found",
   "taxPercent": "Tax (%)",
   "loading": "Loading"
 }

@@ -6,19 +6,48 @@ import type { Order, TableCheck } from "@/types";
 import { formatPrice } from "@/lib/utils";
 
 type Props = {
-  tableId: string | null;
+  tableId?: string | null;
   open: boolean;
   onClose: () => void;
+  check?: TableCheck | null;
+  fetchCheck?: boolean;
+  loading?: boolean;
 };
 
-export const TableCheckModal = ({ tableId, open, onClose }: Props) => {
-  const { t } = useTranslation();
+export const TableCheckModal = ({
+  tableId,
+  open,
+  onClose,
+  check: checkData,
+  fetchCheck = true,
+  loading: externalLoading,
+}: Props) => {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage?.startsWith("ar") ? "ar" : "en";
   const [check, setCheck] = useState<TableCheck | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isLoading = externalLoading ?? loading;
 
   useEffect(() => {
-    if (!open || !tableId) {
+    if (!open) {
+      setCheck(null);
+      setError(null);
+      return;
+    }
+    if (checkData) {
+      setCheck(checkData);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+    if (!fetchCheck) {
+      setCheck(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+    if (!tableId) {
       setCheck(null);
       setError(null);
       return;
@@ -30,7 +59,7 @@ export const TableCheckModal = ({ tableId, open, onClose }: Props) => {
       .then((r) => setCheck(r.data))
       .catch(() => setError(t("errorGeneric")))
       .finally(() => setLoading(false));
-  }, [open, tableId, t]);
+  }, [open, tableId, t, checkData, fetchCheck]);
 
   if (!open) return null;
 
@@ -52,26 +81,57 @@ export const TableCheckModal = ({ tableId, open, onClose }: Props) => {
           </button>
         </header>
 
-        {loading && <p className="text-sm text-stone-500">{t("loading")}…</p>}
+        {isLoading && <p className="text-sm text-stone-500">{t("loading")}…</p>}
         {error && <p className="text-sm text-red-600">{error}</p>}
-        {!loading && check && (
+        {!isLoading && check && (
           <>
             {check.orderCount === 0 ? (
               <p className="text-sm text-stone-500">{t("noTableOrders")}</p>
             ) : (
               <>
-                <ul className="mb-4 max-h-48 space-y-2 overflow-y-auto text-sm">
+                <div className="space-y-4">
                   {(check.orders as Order[]).map((o) => (
-                    <li
-                      key={o._id}
-                      className="flex justify-between gap-2 rounded-lg bg-stone-50 px-3 py-2 dark:bg-stone-800"
-                    >
-                      <span className="font-mono text-xs">{o.orderNumber}</span>
-                      <span className="text-stone-500">{t(o.status)}</span>
-                      <span className="font-medium">{formatPrice(o.total)}</span>
-                    </li>
+                    <div key={o._id} className="rounded-2xl border border-stone-200 bg-white p-3 shadow-sm dark:border-stone-700 dark:bg-stone-900">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="space-y-1">
+                          <p className="font-medium">{o.orderNumber}</p>
+                          <p className="text-xs text-stone-500">{t(o.status)}</p>
+                        </div>
+                        <p className="text-sm font-semibold text-stone-700 dark:text-stone-100">{formatPrice(o.total)}</p>
+                      </div>
+                      <ul className="mt-3 space-y-2 text-sm text-stone-600 dark:text-stone-300">
+                        {o.items.map((item, itemIndex) => (
+                          <li key={itemIndex} className="rounded-2xl bg-stone-50 p-3 dark:bg-stone-950">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="font-medium">{item.name[locale]}</p>
+                                <p className="text-xs text-stone-500">
+                                  {item.quantity} × {formatPrice(item.price)}
+                                </p>
+                              </div>
+                              <p className="font-semibold">{formatPrice(item.subtotal)}</p>
+                            </div>
+                            {item.addons.length > 0 && (
+                              <div className="mt-2 rounded-2xl bg-stone-100 px-3 py-2 text-xs text-stone-500 dark:bg-stone-900">
+                                {item.addons.map((addon, addonIndex) => (
+                                  <div key={addonIndex} className="flex justify-between">
+                                    <span>{addon.name[locale]}</span>
+                                    <span>{formatPrice(addon.price)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {item.notes && (
+                              <p className="mt-2 rounded-2xl bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-900/30">
+                                {item.notes}
+                              </p>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
+                </div>
                 <dl className="space-y-2 border-t border-stone-200 pt-3 text-sm dark:border-stone-700">
                   <div className="flex justify-between">
                     <dt>{t("subtotal")}</dt>

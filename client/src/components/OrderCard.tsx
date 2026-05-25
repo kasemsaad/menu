@@ -4,8 +4,6 @@ import type { Order, OrderStatus } from "@/types";
 import { formatPrice, getOrderTableNumber } from "@/lib/utils";
 import { Clock, ChefHat } from "lucide-react";
 import { ProductDetailModal } from "./ProductDetailModal";
-import type { Product } from "@/types";
-import api from "@/lib/api";
 
 const statusColors: Record<OrderStatus, string> = {
   pending: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200",

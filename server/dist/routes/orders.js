@@ -80,7 +80,6 @@ router.post("/", optionalCustomerAuth, async (req, res) => {
     const populated = await Order.findById(order.id).populate("tableId", "number");
     const serialized = serializeOrder(populated);
     await emitNewOrderToStaff(serialized);
-    emitNotification("admin", { type: "new_order", order: serialized });
     res.status(201).json(serialized);
 });
 router.get("/guest/:id", async (req, res) => {

@@ -39,9 +39,15 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const push = useCallback((message: string, type: ToastType = "info") => {
-    const id = crypto.randomUUID();
-    setToasts((prev) => [...prev.slice(-5), { id, message, type }]);
-    setTimeout(() => setToasts((prev) => prev.filter((x) => x.id !== id)), 8000);
+    setToasts((prev) => {
+      if (prev.some((toast) => toast.message === message && toast.type === type)) {
+        return prev;
+      }
+      const id = crypto.randomUUID();
+      const next = [...prev.slice(-5), { id, message, type }];
+      setTimeout(() => setToasts((current) => current.filter((x) => x.id !== id)), 8000);
+      return next;
+    });
   }, []);
 
   const dismiss = useCallback((id: string) => {
