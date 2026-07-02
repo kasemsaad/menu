@@ -2,16 +2,16 @@
   "name": "restaurant-menu",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "npm run dev --prefix server",
-    "dev:client": "npm run dev --prefix client",
-    "seed": "npm run seed --prefix server",
-    "install:all": "npm install --prefix server && npm install --prefix client"
+    "dev": "concurrently -n backend,reverb,schedule,frontend -c blue,magenta,yellow,green \"npm run dev:backend\" \"npm run dev:reverb\" \"npm run dev:schedule\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && php artisan serve --port=8000",
+    "dev:reverb": "cd backend && php artisan reverb:start",
+    "dev:schedule": "cd backend && php artisan schedule:work",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "seed": "cd backend && php artisan db:seed --force",
+    "migrate": "cd backend && php artisan migrate --force",
+    "install:all": "cd backend && composer install && npm install --prefix ../frontend"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
-  },
-  "dependencies": {
-    "mongodb": "^7.2.0"
   }
 }
