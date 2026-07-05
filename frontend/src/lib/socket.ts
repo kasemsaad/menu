@@ -16,20 +16,16 @@ const REALTIME_EVENTS = ["notification", "order:new", "order:updated", "table:cl
 const handlers = new Map<string, Set<EventHandler>>();
 const subscribedChannels = new Set<string>();
 
-let echoInstance: Echo<"reverb"> | null = null;
+let echoInstance: Echo<any> | null = null;
 
-function getEcho(): Echo<"reverb"> {
+function getEcho(): Echo<any> {
   if (!echoInstance) {
-    const scheme = import.meta.env.VITE_REVERB_SCHEME ?? "http";
+    // ✅ استخدم Pusher بدلاً من Reverb
     echoInstance = new Echo({
-      broadcaster: "reverb",
-      key: import.meta.env.VITE_REVERB_APP_KEY ?? "restaurant-menu-key",
-      wsHost: import.meta.env.VITE_REVERB_HOST ?? "127.0.0.1",
-      wsPort: Number(import.meta.env.VITE_REVERB_PORT ?? 8080),
-      wssPort: Number(import.meta.env.VITE_REVERB_PORT ?? 8080),
-      forceTLS: scheme === "https",
-      enabledTransports: ["ws", "wss"],
-      disableStats: true,
+      broadcaster: "pusher",
+      key: import.meta.env.VITE_PUSHER_APP_KEY ?? "4f14ec6b2a300873d5c4",
+      cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? "eu",
+      forceTLS: true,
     });
   }
   return echoInstance;
@@ -54,7 +50,7 @@ export const joinStaff = (userId: string) => subscribeChannel(`staff.${userId}`)
 export const joinTable = (tableId: string) => subscribeChannel(`table.${tableId}`);
 export const joinOrder = (orderId: string) => subscribeChannel(`order.${orderId}`);
 
-/** Socket.IO-compatible adapter over Laravel Reverb + Echo */
+/** Socket.IO-compatible adapter over Laravel Echo + Pusher */
 export const getSocket = () => ({
   on(event: string, handler: EventHandler) {
     if (!handlers.has(event)) handlers.set(event, new Set());
